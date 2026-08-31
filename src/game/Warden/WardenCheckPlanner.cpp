@@ -76,6 +76,17 @@ bool IsExactProbeProfile(warden::WardenCheckProfile const& profile)
     if (profile.checks.size() != 3u)
         return false;
 
+    warden::Bytes expectedModuleIdentifier;
+    if (profile.key.architecture == warden::WardenArchitecture::X86)
+        expectedModuleIdentifier = {'W', 'o', 'w', '.', 'e', 'x', 'e'};
+    else if (profile.key.architecture == warden::WardenArchitecture::X64)
+    {
+        expectedModuleIdentifier =
+            {'W', 'o', 'w', '-', '6', '4', '.', 'e', 'x', 'e'};
+    }
+    else
+        return false;
+
     std::vector<uint64> addresses;
     std::vector<uint32> lengths;
     for (warden::WardenCheckDefinition const& check : profile.checks)
@@ -89,9 +100,7 @@ bool IsExactProbeProfile(warden::WardenCheckProfile const& profile)
             return false;
         warden::MemCheckProfile const& mem =
             std::get<warden::MemCheckProfile>(check.payload);
-        warden::Bytes const syntheticIdentifier =
-            {0x57, 0x6F, 0x77, 0x2E, 0x65, 0x78, 0x65}; // Wow.exe
-        if (mem.moduleIdentifier != syntheticIdentifier ||
+        if (mem.moduleIdentifier != expectedModuleIdentifier ||
             !mem.expectedBytes.empty())
             return false;
         addresses.push_back(mem.addressOrRva);

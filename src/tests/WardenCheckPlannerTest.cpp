@@ -35,10 +35,35 @@
 namespace
 {
 warden::WardenCheckProfile const* FindProfile(
-    warden::WardenCheckCatalog const& catalog, warden::ClientVariant variant)
+    warden::WardenCheckCatalog const& catalog, warden::ClientVariant variant,
+    warden::WardenArchitecture architecture =
+        warden::WardenArchitecture::X86)
 {
-    return catalog.FindProfileExact({15595, warden::WardenArchitecture::X86,
+    return catalog.FindProfileExact({15595, architecture,
         warden::test::EnUsLocale(), variant});
+}
+
+warden::WardenCheckCatalog BuildCatalog(
+    std::vector<warden::WardenCheckRowInput> const& rows)
+{
+    warden::WardenCheckCatalogBuilder builder;
+    warden::WardenCheckDiagnostic diagnostic;
+    for (warden::WardenCheckRowInput const& row : rows)
+    {
+        if (builder.Add(row, diagnostic) !=
+            warden::CheckCatalogValidation::Valid)
+        {
+            return {};
+        }
+    }
+
+    warden::WardenCheckCatalog catalog;
+    if (builder.Build(catalog, diagnostic) !=
+        warden::CheckCatalogValidation::Valid)
+    {
+        return {};
+    }
+    return catalog;
 }
 
 std::vector<uint32> CheckIds(warden::CheckPlan const& plan)
@@ -82,6 +107,55 @@ TEST(WardenCheckPlanner_builds_only_the_minimal_unclassified_profile_probe)
         CHECK(check.phaseMask == warden::PhaseProfileProbe);
         CHECK(!warden::IsActionableEvidenceClass(check.evidenceClass));
     }
+}
+
+TEST(WardenCheckPlanner_requires_the_executable_name_for_each_probe_abi)
+{
+    warden::WardenCheckCatalog const x86Catalog = BuildCatalog(
+        warden::test::ProfileProbeRows(warden::WardenArchitecture::X86));
+    warden::WardenCheckProfile const* x86 = FindProfile(x86Catalog,
+        warden::ClientVariant::Unclassified,
+        warden::WardenArchitecture::X86);
+    REQUIRE(x86 != nullptr);
+
+    warden::CheckPlan plan;
+    warden::WardenCheckPlanner x86Planner(*x86);
+    REQUIRE(x86Planner.Build(warden::CheckPlanPurpose::ProfileProbe, 1,
+        plan) == warden::CheckPlanValidation::Valid);
+
+    warden::WardenCheckProfile wrongX86 = *x86;
+    for (warden::WardenCheckDefinition& definition : wrongX86.checks)
+    {
+        warden::MemCheckProfile& memory =
+            std::get<warden::MemCheckProfile>(definition.payload);
+        memory.moduleIdentifier =
+            {'W', 'o', 'w', '-', '6', '4', '.', 'e', 'x', 'e'};
+    }
+    warden::WardenCheckPlanner wrongX86Planner(wrongX86);
+    CHECK(wrongX86Planner.Build(warden::CheckPlanPurpose::ProfileProbe, 2,
+        plan) == warden::CheckPlanValidation::InvalidProfilePurpose);
+
+    warden::WardenCheckCatalog const x64Catalog = BuildCatalog(
+        warden::test::ProfileProbeRows(warden::WardenArchitecture::X64));
+    warden::WardenCheckProfile const* x64 = FindProfile(x64Catalog,
+        warden::ClientVariant::Unclassified,
+        warden::WardenArchitecture::X64);
+    REQUIRE(x64 != nullptr);
+
+    warden::WardenCheckPlanner x64Planner(*x64);
+    REQUIRE(x64Planner.Build(warden::CheckPlanPurpose::ProfileProbe, 3,
+        plan) == warden::CheckPlanValidation::Valid);
+
+    warden::WardenCheckProfile wrongX64 = *x64;
+    for (warden::WardenCheckDefinition& definition : wrongX64.checks)
+    {
+        warden::MemCheckProfile& memory =
+            std::get<warden::MemCheckProfile>(definition.payload);
+        memory.moduleIdentifier = {'W', 'o', 'w', '.', 'e', 'x', 'e'};
+    }
+    warden::WardenCheckPlanner wrongX64Planner(wrongX64);
+    CHECK(wrongX64Planner.Build(warden::CheckPlanPurpose::ProfileProbe, 4,
+        plan) == warden::CheckPlanValidation::InvalidProfilePurpose);
 }
 
 TEST(WardenCheckPlanner_rejects_probe_purpose_for_a_classified_profile)

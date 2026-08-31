@@ -213,8 +213,14 @@ void AppendPackedValue(warden::Bytes& output, uint64 value)
 warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
     warden::CheckPlan const& plan, CheckPlanAnalysis& output)
 {
-    if (abi != warden::ModuleAbi::Cata15595X86 ||
-        plan.profileKey.architecture != warden::WardenArchitecture::X86)
+    bool const abiMatches =
+        (abi == warden::ModuleAbi::Cata15595X86 &&
+            plan.profileKey.architecture ==
+                warden::WardenArchitecture::X86) ||
+        (abi == warden::ModuleAbi::Cata15595X64 &&
+            plan.profileKey.architecture ==
+                warden::WardenArchitecture::X64);
+    if (!abiMatches)
     {
         return warden::CheckPlanValidation::InvalidAbi;
     }
@@ -240,7 +246,7 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
 
     auto addRequestBytes = [&candidate](std::size_t bytes)
     {
-        if (bytes > warden::Cata15595X86CheckBufferSize -
+        if (bytes > warden::Cata15595CheckBufferSize -
                 candidate.budget.requestBody)
         {
             return false;
@@ -250,7 +256,7 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
     };
     auto addResultBytes = [&candidate](std::size_t bytes)
     {
-        if (bytes > warden::Cata15595X86CheckBufferSize -
+        if (bytes > warden::Cata15595CheckBufferSize -
                 candidate.budget.maximumResultBody)
         {
             return false;
@@ -271,7 +277,7 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
             return warden::CheckPlanValidation::TooManyStrings;
         }
         std::size_t const bytes = 1 + value.size();
-        if (bytes > warden::Cata15595X86CheckBufferSize -
+        if (bytes > warden::Cata15595CheckBufferSize -
                 candidate.budget.stringTableBytes)
         {
             return warden::CheckPlanValidation::StringTableTooLarge;
@@ -344,6 +350,8 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
         if (warden::MpqCheckProfile const* mpq =
                 std::get_if<warden::MpqCheckProfile>(&definition.payload))
         {
+            if (abi == warden::ModuleAbi::Cata15595X64)
+                return warden::CheckPlanValidation::InvalidDefinition;
             if (definition.addressKind != warden::WardenAddressKind::None ||
                 !IsWireString(mpq->path))
             {
@@ -363,7 +371,6 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
         warden::MemCheckProfile const* memory =
             std::get_if<warden::MemCheckProfile>(&definition.payload);
         if (!memory || !memory->checkId || !memory->addressOrRva ||
-            memory->addressOrRva > std::numeric_limits<uint32>::max() ||
             !memory->length ||
             memory->length > std::numeric_limits<uint8>::max())
         {
@@ -381,6 +388,11 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
         if (definition.addressKind ==
             warden::WardenAddressKind::ModuleRelativeRva)
         {
+            if (memory->addressOrRva >
+                std::numeric_limits<uint32>::max())
+            {
+                return warden::CheckPlanValidation::InvalidDefinition;
+            }
             if (!ModuleIdentifierToString(memory->moduleIdentifier,
                     moduleName))
             {
@@ -390,10 +402,29 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
                 addString(moduleName);
             if (stringStatus != warden::CheckPlanValidation::Valid)
                 return stringStatus;
+
+            std::string const expectedModule =
+                abi == warden::ModuleAbi::Cata15595X86 ?
+                    "Wow.exe" : "Wow-64.exe";
+            if (moduleName != expectedModule)
+                return warden::CheckPlanValidation::InvalidDefinition;
         }
         else if (definition.addressKind !=
                      warden::WardenAddressKind::AbsoluteVa ||
             !memory->moduleIdentifier.empty())
+        {
+            return warden::CheckPlanValidation::InvalidDefinition;
+        }
+
+        uint64 const maximumAddress =
+            definition.addressKind ==
+                    warden::WardenAddressKind::ModuleRelativeRva ||
+                abi == warden::ModuleAbi::Cata15595X86 ?
+                uint64(std::numeric_limits<uint32>::max()) :
+                uint64(0x00007FFFFFFFFFFF);
+        if (memory->addressOrRva > maximumAddress ||
+            uint64(memory->length - 1) >
+                maximumAddress - memory->addressOrRva)
         {
             return warden::CheckPlanValidation::InvalidDefinition;
         }
@@ -484,15 +515,16 @@ EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext)
         }
         case ModuleAbi::Cata15595X64:
         {
-            // The signed-cross-build candidate is constrained to one timing
-            // record and never receives Lua or filesystem callbacks.
-            static constexpr std::array<uint8, 15> TimingOnlyInitialization =
-            {{
+            // The x64 candidate registers only the audited FrameXML and timing
+            // callbacks. Filesystem and arbitrary-Lua execution remain absent.
+            static constexpr std::array<uint8, 34> Initialization = {{
+                0x03, 0x0C, 0x00, 0xF7, 0x17, 0xB3, 0x83,
+                0x04, 0x00, 0x00, 0x10, 0x81, 0x56, 0x00,
+                0xC0, 0x6B, 0x56, 0x00, 0x01,
                 0x03, 0x08, 0x00, 0x99, 0x06, 0x76, 0x7A, 0x01,
                 0x01, 0x00, 0x00, 0x25, 0x5B, 0x00, 0x01
             }};
-            plaintext.assign(TimingOnlyInitialization.begin(),
-                TimingOnlyInitialization.end());
+            plaintext.assign(Initialization.begin(), Initialization.end());
             return EncodeStatus::Ok;
         }
         default:
@@ -563,9 +595,7 @@ ModuleDecodeStatus DecodeCompatibilityTimingResult(ModuleAbi abi,
         return ModuleDecodeStatus::InvalidChecksum;
 
     uint8 const status = plaintext.data()[7];
-    if (status == 0)
-        return ModuleDecodeStatus::ModuleReportedFailure;
-    if (status != 1)
+    if (status > 1)
         return ModuleDecodeStatus::InvalidStatus;
 
     clientTick = ReadLittleEndian32(plaintext.data() + 8);
@@ -586,12 +616,23 @@ CheckPlanValidation InspectCheckPlan(ModuleAbi abi, CheckPlan const& plan,
 EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
     WardenCheckXorKey checkXorKey, CheckPlan const& plan, Bytes& encoded)
 {
-    if (profile.abi != ModuleAbi::Cata15595X86)
+    if (profile.abi != ModuleAbi::Cata15595X86 &&
+        profile.abi != ModuleAbi::Cata15595X64)
+    {
         return EncodeStatus::InvalidAbi;
-    if (profile.checkCodes.timing != Cata15595X86TimingCode ||
-        profile.checkCodes.lua != Cata15595X86LuaCode ||
-        profile.checkCodes.mpq != 0 ||
-        profile.checkCodes.memory != Cata15595X86MemoryCode)
+    }
+    bool const validCheckCodes =
+        (profile.abi == ModuleAbi::Cata15595X86 &&
+            profile.checkCodes.timing == Cata15595X86TimingCode &&
+            profile.checkCodes.lua == Cata15595X86LuaCode &&
+            profile.checkCodes.mpq == 0 &&
+            profile.checkCodes.memory == Cata15595X86MemoryCode) ||
+        (profile.abi == ModuleAbi::Cata15595X64 &&
+            profile.checkCodes.timing == Cata15595X64TimingCode &&
+            profile.checkCodes.lua == Cata15595X64LuaCode &&
+            profile.checkCodes.mpq == 0 &&
+            profile.checkCodes.memory == Cata15595X64MemoryCode);
+    if (!validCheckCodes)
     {
         return EncodeStatus::InvalidProfile;
     }
@@ -675,9 +716,9 @@ EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
         AppendPackedValue(candidate, memory->addressOrRva);
         candidate.push_back(uint8(memory->length));
     }
-    // Unlike the stale public enum, this module terminates its decoded check
-    // stream with 0xD9. The wire byte remains per-session XOR encoded.
-    candidate.push_back(uint8(Cata15595X86EndCode ^ xorKey));
+    uint8 const endCode = profile.abi == ModuleAbi::Cata15595X86 ?
+        Cata15595X86EndCode : Cata15595X64EndCode;
+    candidate.push_back(uint8(endCode ^ xorKey));
     if (candidate.size() != analysis.budget.requestBody)
         return EncodeStatus::InvalidPlan;
 
@@ -688,7 +729,8 @@ EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
 DecodeStatus DecodeCheckResult(ModuleAbi abi, ByteView plaintext,
     CheckPlan const& plan, CheckBatchResult& result)
 {
-    if (abi != ModuleAbi::Cata15595X86)
+    if (abi != ModuleAbi::Cata15595X86 &&
+        abi != ModuleAbi::Cata15595X64)
         return DecodeStatus::InvalidAbi;
     if (plaintext.empty())
         return DecodeStatus::Empty;
@@ -698,7 +740,7 @@ DecodeStatus DecodeCheckResult(ModuleAbi abi, ByteView plaintext,
         return DecodeStatus::UnsupportedCommand;
 
     uint16 const resultLength = ReadLittleEndian16(plaintext.data() + 1);
-    if (resultLength > Cata15595X86CheckBufferSize ||
+    if (resultLength > Cata15595CheckBufferSize ||
         plaintext.size() != CheckResultEnvelopeSize + resultLength)
     {
         return DecodeStatus::WrongSize;
@@ -712,7 +754,11 @@ DecodeStatus DecodeCheckResult(ModuleAbi abi, ByteView plaintext,
         return DecodeStatus::ChecksumMismatch;
 
     CheckPlanAnalysis analysis;
-    if (AnalyzeCheckPlan(abi, plan, analysis) != CheckPlanValidation::Valid)
+    CheckPlanValidation const planStatus =
+        AnalyzeCheckPlan(abi, plan, analysis);
+    if (planStatus == CheckPlanValidation::InvalidAbi)
+        return DecodeStatus::InvalidAbi;
+    if (planStatus != CheckPlanValidation::Valid)
         return DecodeStatus::InvalidValue;
 
     CheckBatchResult decoded;

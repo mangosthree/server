@@ -1575,9 +1575,13 @@ warden::ModuleProfile BuildProfile()
     profile.key = {15595, warden::WardenArchitecture::X64};
     profile.abi = warden::ModuleAbi::Cata15595X64;
     profile.provenance = warden::ModuleProvenance::SignedCrossBuild;
-    profile.operatingMode = warden::ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.operatingMode = warden::ModuleOperatingMode::Full;
     profile.assurance = warden::ModuleAssurance::StaticVerified;
-    profile.checkCodes = {0xEA, 0x00, 0x00, 0x00};
+    profile.checkCodes = {
+        warden::Cata15595X64TimingCode,
+        warden::Cata15595X64LuaCode,
+        0,
+        warden::Cata15595X64MemoryCode};
     profile.rekey.seed = {{
             0x8D, 0xB6, 0xE0, 0xC5, 0x86, 0x5A, 0x1F, 0xDB, 0x81, 0x0F, 0x26, 0xDB, 0x77, 0x3F, 0x68, 0x1F
     }};

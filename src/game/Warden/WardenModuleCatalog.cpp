@@ -68,18 +68,28 @@ bool HasValidMetadata(warden::ModuleProfile const& profile)
             return false;
     }
 
-    if (profile.operatingMode == warden::ModuleOperatingMode::Full)
+    switch (profile.provenance)
     {
-        return profile.provenance ==
-                warden::ModuleProvenance::RetailCaptured15595 ||
-            profile.provenance ==
-                warden::ModuleProvenance::BuildMatchedPublic;
+        case warden::ModuleProvenance::RetailCaptured15595:
+        case warden::ModuleProvenance::BuildMatchedPublic:
+            break;
+        case warden::ModuleProvenance::SignedCrossBuild:
+            if (profile.assurance ==
+                warden::ModuleAssurance::ProductionApproved)
+            {
+                return false;
+            }
+            break;
+        default:
+            return false;
     }
+
+    if (profile.operatingMode == warden::ModuleOperatingMode::Full)
+        return true;
 
     return profile.operatingMode ==
             warden::ModuleOperatingMode::CompatibilityProbeOnly &&
-        profile.provenance == warden::ModuleProvenance::SignedCrossBuild &&
-        profile.assurance != warden::ModuleAssurance::ProductionApproved;
+        profile.provenance == warden::ModuleProvenance::SignedCrossBuild;
 }
 
 bool HasDuplicateNonzeroCheckCode(warden::ModuleCheckCodes const& codes)
@@ -153,24 +163,31 @@ ModuleCatalogValidation WardenModuleCatalogBuilder::Add(
         return ModuleCatalogValidation::InvalidMetadata;
     if (HasDuplicateNonzeroCheckCode(profile.checkCodes))
         return ModuleCatalogValidation::DuplicateCheckCode;
-    if (profile.operatingMode == ModuleOperatingMode::Full &&
-        (profile.abi != ModuleAbi::Cata15595X86 ||
-            profile.checkCodes.timing != Cata15595X86TimingCode ||
-            profile.checkCodes.lua != Cata15595X86LuaCode ||
-            profile.checkCodes.mpq != 0 ||
-            profile.checkCodes.memory != Cata15595X86MemoryCode))
+    bool validCheckCodeMap = false;
+    if (profile.operatingMode == ModuleOperatingMode::Full)
     {
-        // The x64 full-scan ABI remains deliberately unpublished until an
-        // exact-client module and its complete command grammar satisfy G2.
-        return ModuleCatalogValidation::InvalidCheckCodeMap;
+        validCheckCodeMap =
+            (profile.abi == ModuleAbi::Cata15595X86 &&
+                profile.checkCodes.timing == Cata15595X86TimingCode &&
+                profile.checkCodes.lua == Cata15595X86LuaCode &&
+                profile.checkCodes.mpq == 0 &&
+                profile.checkCodes.memory == Cata15595X86MemoryCode) ||
+            (profile.abi == ModuleAbi::Cata15595X64 &&
+                profile.checkCodes.timing == Cata15595X64TimingCode &&
+                profile.checkCodes.lua == Cata15595X64LuaCode &&
+                profile.checkCodes.mpq == 0 &&
+                profile.checkCodes.memory == Cata15595X64MemoryCode);
     }
-    if (profile.operatingMode == ModuleOperatingMode::CompatibilityProbeOnly &&
-        (profile.checkCodes.timing != CataX64CompatibilityTimingCode ||
-            profile.checkCodes.lua != 0 || profile.checkCodes.mpq != 0 ||
-            profile.checkCodes.memory != 0))
+    else if (profile.operatingMode ==
+        ModuleOperatingMode::CompatibilityProbeOnly)
     {
-        return ModuleCatalogValidation::InvalidCheckCodeMap;
+        validCheckCodeMap = profile.abi == ModuleAbi::Cata15595X64 &&
+            profile.checkCodes.timing == Cata15595X64TimingCode &&
+            profile.checkCodes.lua == 0 && profile.checkCodes.mpq == 0 &&
+            profile.checkCodes.memory == 0;
     }
+    if (!validCheckCodeMap)
+        return ModuleCatalogValidation::InvalidCheckCodeMap;
     if (IsZero(profile.rekey.seed) ||
         IsZero(profile.rekey.expectedResponse) ||
         IsZero(profile.rekey.clientToServer) ||

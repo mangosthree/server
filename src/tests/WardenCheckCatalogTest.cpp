@@ -246,7 +246,7 @@ TEST(WardenCheckCatalog_rejects_invalid_address_kind_combinations)
     CHECK(AddOne(row) == warden::CheckCatalogValidation::InvalidAddress);
 
     row = warden::test::ClassifiedRows(warden::WardenArchitecture::X64,
-        warden::ClientVariant::Stock)[1];
+        warden::ClientVariant::Stock)[2];
     row.address = uint64(0x0000800000000000);
     CHECK(AddOne(row) == warden::CheckCatalogValidation::InvalidAddress);
 }
@@ -341,7 +341,7 @@ TEST(WardenCheckCatalogLoader_requires_full_module_profile_coverage)
 TEST(WardenCheckCatalogLoader_publishes_only_a_complete_valid_snapshot)
 {
     std::vector<warden::WardenCheckRowInput> const rows =
-        warden::test::CompleteX86Rows();
+        warden::test::CompleteSyntheticRows();
     warden::WardenCheckCatalogLoadTransaction transaction;
     REQUIRE(transaction.Begin(rows.size()) ==
         warden::WardenCheckCatalogLoadFailure::None);
@@ -360,7 +360,7 @@ TEST(WardenCheckCatalogLoader_publishes_only_a_complete_valid_snapshot)
     CHECK(transaction.Finish(modules,
         [&published](std::shared_ptr<warden::WardenCheckCatalog const> const& snapshot)
         {
-            published = snapshot && snapshot->Profiles().size() == 3u;
+            published = snapshot && snapshot->Profiles().size() == 6u;
             return published;
         }, diagnostic) == warden::WardenCheckCatalogLoadFailure::None);
     CHECK(published);
@@ -369,7 +369,7 @@ TEST(WardenCheckCatalogLoader_publishes_only_a_complete_valid_snapshot)
 TEST(WardenCheckCatalogLoader_rejects_short_or_rejected_publication)
 {
     std::vector<warden::WardenCheckRowInput> const rows =
-        warden::test::CompleteX86Rows();
+        warden::test::CompleteSyntheticRows();
     warden::WardenCheckCatalogLoadTransaction shortRead;
     REQUIRE(shortRead.Begin(rows.size()) ==
         warden::WardenCheckCatalogLoadFailure::None);

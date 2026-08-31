@@ -74,7 +74,8 @@ uint32 ReadUint32(uint8 const* bytes)
 }
 
 bool BuildClientCheckResult(warden::CheckPlan const& plan,
-    std::vector<warden::Bytes> const& probeBytes, warden::Bytes& plaintext)
+    std::vector<warden::Bytes> const& probeBytes, warden::Bytes& plaintext,
+    bool timingStable = true)
 {
     warden::Bytes body;
     std::size_t probeIndex = 0;
@@ -83,7 +84,7 @@ bool BuildClientCheckResult(warden::CheckPlan const& plan,
         if (std::holds_alternative<warden::TimingCheckProfile>(
                 definition.payload))
         {
-            body.push_back(1);
+            body.push_back(timingStable ? 1 : 0);
             AppendUint32(body, 0x12345678);
             continue;
         }
@@ -353,40 +354,30 @@ struct Harness
         return true;
     }
 
-    bool ReachProvisionalTimingProbe()
-    {
-        if (!CacheHit(warden::WardenArchitecture::X64) ||
-            !CompleteModuleHash(warden::WardenArchitecture::X64))
-        {
-            return false;
-        }
-
-        warden::Bytes const initialization = ReadServer();
-        warden::Bytes const timingRequest = ReadServer();
-        static constexpr std::array<uint8, 15> ExpectedInitialization = {{
-            0x03, 0x08, 0x00, 0x99, 0x06, 0x76, 0x7A, 0x01,
-            0x01, 0x00, 0x00, 0x25, 0x5B, 0x00, 0x01}};
-        static constexpr std::array<uint8, 4> ExpectedTimingRequest = {{
-            0x02, 0x00, 0xBF, 0x55}};
-        return server->GetState() ==
-                warden::WardenState::ProvisionalTimingProbeSent &&
-            std::equal(initialization.begin(), initialization.end(),
-                ExpectedInitialization.begin(), ExpectedInitialization.end()) &&
-            std::equal(timingRequest.begin(), timingRequest.end(),
-                ExpectedTimingRequest.begin(), ExpectedTimingRequest.end());
-    }
-
     bool ReachReadyForWorld(warden::WardenArchitecture architecture)
     {
         if (!CacheHit(architecture) || !CompleteModuleHash(architecture))
             return false;
-        if (architecture != warden::WardenArchitecture::X86 ||
-            server->GetState() != warden::WardenState::ReadyForWorld)
+        if (server->GetState() != warden::WardenState::ReadyForWorld)
         {
             return false;
         }
         warden::Bytes const initialization = ReadServer();
-        return !initialization.empty() && initialization[0] == 3;
+        warden::Bytes const expected =
+            architecture == warden::WardenArchitecture::X86 ?
+                warden::Bytes({
+                    0x03, 0x0C, 0x00, 0xE9, 0xAB, 0x2B, 0xD1,
+                    0x04, 0x00, 0x00, 0x10, 0xD3, 0x43, 0x00,
+                    0x30, 0xC2, 0x43, 0x00, 0x01,
+                    0x03, 0x08, 0x00, 0x4C, 0xA0, 0x9E, 0x6C,
+                    0x01, 0x01, 0x00, 0x40, 0x97, 0x47, 0x00, 0x01}) :
+                warden::Bytes({
+                    0x03, 0x0C, 0x00, 0xF7, 0x17, 0xB3, 0x83,
+                    0x04, 0x00, 0x00, 0x10, 0x81, 0x56, 0x00,
+                    0xC0, 0x6B, 0x56, 0x00, 0x01,
+                    0x03, 0x08, 0x00, 0x99, 0x06, 0x76, 0x7A,
+                    0x01, 0x01, 0x00, 0x00, 0x25, 0x5B, 0x00, 0x01});
+        return initialization == expected;
     }
 
     bool ReachHealthy(warden::WardenArchitecture architecture)
@@ -478,7 +469,7 @@ std::size_t CountCommand(Harness& harness, uint8 command,
 }
 }
 
-TEST(WardenManager_stages_probe_only_architecture_only_in_observe_mode)
+TEST(WardenManager_requires_observe_until_every_module_is_production_approved)
 {
     Harness observe;
     CHECK(observe.server != nullptr);
@@ -511,16 +502,18 @@ TEST(WardenManager_rejects_non_alpha_or_non_exact_locale_identity)
     CHECK(nonAlphaLocale.server == nullptr);
 }
 
-TEST(WardenManager_rejects_database_profiles_for_a_probe_only_module)
+TEST(WardenManager_rejects_incomplete_profiles_for_a_full_module)
 {
-    warden::WardenCheckCatalog const x86 =
+    warden::WardenCheckCatalog const complete =
         warden::test::BuildSyntheticCheckCatalog();
-    std::vector<warden::WardenCheckProfile> profiles = x86.Profiles();
-    for (warden::WardenCheckProfile profile : x86.Profiles())
-    {
-        profile.key.architecture = warden::WardenArchitecture::X64;
-        profiles.push_back(std::move(profile));
-    }
+    std::vector<warden::WardenCheckProfile> profiles = complete.Profiles();
+    profiles.erase(std::remove_if(profiles.begin(), profiles.end(),
+        [](warden::WardenCheckProfile const& profile)
+        {
+            return profile.key.architecture ==
+                    warden::WardenArchitecture::X64 &&
+                profile.key.variant == warden::ClientVariant::Grunt;
+        }), profiles.end());
     auto invalid = std::make_shared<warden::WardenCheckCatalog const>(
         warden::WardenCheckCatalogTestAccess::PublishUnchecked(
             std::move(profiles)));
@@ -1107,36 +1100,90 @@ TEST(WardenServer_nonterminal_observer_failure_stops_follow_on_mutation)
     CHECK(healthy.evidence.empty());
 }
 
-TEST(WardenServer_x64_candidate_completes_only_bounded_timing_probe)
+TEST(WardenServer_x64_real_module_check_flow_reaches_healthy)
 {
     Harness harness;
-    REQUIRE(harness.CacheHit(warden::WardenArchitecture::X64));
-    REQUIRE(harness.CompleteModuleHash(warden::WardenArchitecture::X64));
-    CHECK(harness.server->GetState() ==
-        warden::WardenState::ProvisionalTimingProbeSent);
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X64));
 
-    warden::Bytes const initialization = harness.ReadServer();
-    CHECK_HEX(initialization.data(), initialization.size(),
-        "0308009906767a01010000255b0001");
-    warden::Bytes const timingRequest = harness.ReadServer();
-    CHECK_HEX(timingRequest.data(), timingRequest.size(), "0200bf55");
+    harness.server->Update(true, 0);
+    std::optional<warden::CheckPlan> probe =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(probe.has_value());
+    warden::Bytes const probeRequest = harness.ReadServer();
+    REQUIRE(!probeRequest.empty());
+    CHECK_EQ(probeRequest[0], uint8(2));
 
-    harness.SendClient({
-        0x02, 0x05, 0x00, 0xA7, 0xD4, 0x3E,
-        0x25, 0x01, 0x78, 0x56, 0x34, 0x12});
+    warden::Bytes probeResult;
+    REQUIRE(BuildClientCheckResult(*probe,
+        warden::test::X64StockFingerprint(), probeResult));
+    harness.SendClient(std::move(probeResult));
     CHECK(harness.server->GetState() ==
-        warden::WardenState::ProvisionalValidated);
-    CHECK(harness.evidence.empty());
-    CHECK(!harness.server->QueueConfirmation(1));
+        warden::WardenState::InitialChecksSent);
 
-    harness.server->Update(true, std::numeric_limits<uint32>::max());
-    CHECK(harness.server->GetState() ==
-        warden::WardenState::ProvisionalValidated);
+    std::optional<warden::CheckPlan> initial =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(initial.has_value());
+    REQUIRE(initial->checks.size() == 3u);
+    warden::Bytes const initialRequest = harness.ReadServer();
+    CHECK_HEX(initialRequest.data(), initialRequest.size(),
+        "02044f4b41590a576f772d36342e65786500"
+        "bf0401630206136c561055");
+
+    warden::Bytes initialResult;
+    REQUIRE(BuildClientCheckResult(*initial, {}, initialResult));
+    CHECK_HEX(initialResult.data(), initialResult.size(),
+        "021c0000e6163b017856341200044f6b617900"
+        "4883c9ff33c0488bfdbaf0d8fffff2ae");
+    harness.SendClient(std::move(initialResult));
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+    REQUIRE(harness.evidence.size() == 1u);
+    CHECK(warden::IsCompleteCleanOperatorBatch(harness.evidence.front()));
+
     std::vector<warden::WardenState> const states = States(harness);
     CHECK(std::find(states.begin(), states.end(),
-              warden::WardenState::ReadyForWorld) == states.end());
+        warden::WardenState::ProvisionalTimingProbeSent) == states.end());
     CHECK(std::find(states.begin(), states.end(),
-              warden::WardenState::Healthy) == states.end());
+        warden::WardenState::ProvisionalValidated) == states.end());
+}
+
+TEST(WardenServer_x64_unstable_timing_is_nonactionable_and_recurs)
+{
+    Harness harness;
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X64));
+    harness.server->Update(true, 0);
+
+    std::optional<warden::CheckPlan> probe =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(probe.has_value());
+    REQUIRE(!harness.ReadServer().empty());
+    warden::Bytes probeResult;
+    REQUIRE(BuildClientCheckResult(*probe,
+        warden::test::X64StockFingerprint(), probeResult));
+    harness.SendClient(std::move(probeResult));
+
+    std::optional<warden::CheckPlan> initial =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(initial.has_value());
+    REQUIRE(!harness.ReadServer().empty());
+    warden::Bytes initialResult;
+    REQUIRE(BuildClientCheckResult(*initial, {}, initialResult, false));
+    harness.SendClient(std::move(initialResult));
+
+    CHECK(harness.server->GetState() == warden::WardenState::Recurring);
+    REQUIRE(harness.evidence.size() == 1u);
+    auto const timing = std::find_if(harness.evidence.front().evidence.begin(),
+        harness.evidence.front().evidence.end(),
+        [](warden::WardenEvidence const& item)
+        {
+            return item.checkType == warden::WardenCheckType::Timing;
+        });
+    REQUIRE(timing != harness.evidence.front().evidence.end());
+    CHECK(timing->outcome == warden::WardenCheckOutcome::Unstable);
+    CHECK(!warden::IsActionableEvidenceClass(timing->evidenceClass));
+    CHECK(!harness.server->QueueConfirmation(timing->checkId));
+    std::vector<warden::WardenState> const states = States(harness);
+    CHECK(std::find(states.begin(), states.end(),
+        warden::WardenState::Healthy) == states.end());
 }
 
 TEST(WardenServer_x86_hash_rekeys_and_sends_exact_initialization)
@@ -1151,109 +1198,4 @@ TEST(WardenServer_x86_hash_rekeys_and_sends_exact_initialization)
         "030c00e9ab2bd104000010d3430030c2430001"
         "0308004ca09e6c0101004097470001");
     CHECK(harness.evidence.empty());
-}
-
-TEST(WardenServer_x64_candidate_rejects_every_invalid_timing_result_operationally)
-{
-    {
-        Harness harness;
-        REQUIRE(harness.ReachProvisionalTimingProbe());
-        harness.SendClient({
-            0x02, 0x05, 0x00, 0xA4, 0x90, 0xE0,
-            0x96, 0x00, 0x78, 0x56, 0x34, 0x12});
-        CHECK(harness.server->GetState() == warden::WardenState::Failed);
-        CHECK(harness.server->GetFailure() ==
-            warden::WardenFailure::CompatibilityProbeFailed);
-        CHECK(harness.evidence.empty());
-        CHECK(!harness.server->QueueConfirmation(1));
-    }
-
-    {
-        Harness harness;
-        REQUIRE(harness.ReachProvisionalTimingProbe());
-        harness.SendClient({
-            0x02, 0x05, 0x00, 0x24, 0x36, 0x22,
-            0x04, 0x02, 0x78, 0x56, 0x34, 0x12});
-        CHECK(harness.server->GetState() == warden::WardenState::Failed);
-        CHECK(harness.server->GetFailure() ==
-            warden::WardenFailure::CompatibilityProbeFailed);
-        CHECK(harness.evidence.empty());
-    }
-
-    {
-        Harness harness;
-        REQUIRE(harness.ReachProvisionalTimingProbe());
-        harness.SendClient({
-            0x03, 0x05, 0x00, 0xA7, 0xD4, 0x3E,
-            0x25, 0x01, 0x78, 0x56, 0x34, 0x12});
-        CHECK(harness.server->GetState() == warden::WardenState::Failed);
-        CHECK(harness.server->GetFailure() ==
-            warden::WardenFailure::CompatibilityProbeFailed);
-        CHECK(harness.evidence.empty());
-    }
-
-    {
-        Harness harness;
-        REQUIRE(harness.ReachProvisionalTimingProbe());
-        harness.SendClient({
-            0x02, 0x05, 0x00, 0xA6, 0xD4, 0x3E,
-            0x25, 0x01, 0x78, 0x56, 0x34, 0x12});
-        CHECK(harness.server->GetState() == warden::WardenState::Failed);
-        CHECK(harness.server->GetFailure() ==
-            warden::WardenFailure::CompatibilityProbeFailed);
-        CHECK(harness.evidence.empty());
-    }
-
-    {
-        Harness harness;
-        REQUIRE(harness.ReachProvisionalTimingProbe());
-        harness.SendClient({0x02});
-        CHECK(harness.server->GetState() == warden::WardenState::Failed);
-        CHECK(harness.server->GetFailure() ==
-            warden::WardenFailure::CompatibilityProbeFailed);
-        CHECK(harness.evidence.empty());
-    }
-}
-
-TEST(WardenServer_x64_candidate_timeout_and_send_failure_are_nonactionable)
-{
-    Harness timeout;
-    REQUIRE(timeout.ReachProvisionalTimingProbe());
-    timeout.server->Update(true, 30000);
-    CHECK(timeout.server->GetState() == warden::WardenState::Failed);
-    CHECK(timeout.server->GetFailure() ==
-        warden::WardenFailure::CompatibilityProbeFailed);
-    CHECK(timeout.evidence.empty());
-
-    Harness sendFailure;
-    REQUIRE(sendFailure.CacheHit(warden::WardenArchitecture::X64));
-    sendFailure.sendSucceeds = false;
-    REQUIRE(sendFailure.CompleteModuleHash(warden::WardenArchitecture::X64));
-    CHECK(sendFailure.server->GetState() == warden::WardenState::Failed);
-    CHECK(sendFailure.server->GetFailure() ==
-        warden::WardenFailure::CompatibilityProbeFailed);
-    CHECK(sendFailure.evidence.empty());
-}
-
-TEST(WardenServer_x64_candidate_success_is_an_inert_terminal_state)
-{
-    Harness harness;
-    REQUIRE(harness.ReachProvisionalTimingProbe());
-    harness.SendClient({
-        0x02, 0x05, 0x00, 0xA7, 0xD4, 0x3E,
-        0x25, 0x01, 0x78, 0x56, 0x34, 0x12});
-    REQUIRE(harness.server->GetState() ==
-        warden::WardenState::ProvisionalValidated);
-
-    std::size_t const eventCount = harness.events.size();
-    std::size_t const frameCount = harness.sent.size();
-    harness.SendClient({0xFF});
-    harness.server->Update(true, std::numeric_limits<uint32>::max());
-
-    CHECK(harness.server->GetState() ==
-        warden::WardenState::ProvisionalValidated);
-    CHECK_EQ(harness.events.size(), eventCount);
-    CHECK_EQ(harness.sent.size(), frameCount);
-    CHECK(harness.evidence.empty());
-    CHECK(!harness.server->QueueConfirmation(1));
 }

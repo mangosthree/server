@@ -131,15 +131,74 @@ TEST(WardenModuleCatalog_requires_both_architecture_profiles)
     CHECK(catalog.Profiles().empty());
 }
 
-TEST(WardenModuleCatalog_rejects_signed_cross_build_full_profile)
+TEST(WardenModuleCatalog_allows_signed_cross_build_full_below_production_assurance)
 {
     warden::ModuleProfile profile =
         SyntheticProfile(warden::WardenArchitecture::X64);
     profile.operatingMode = warden::ModuleOperatingMode::Full;
+    profile.checkCodes = {0xEA, 0x51, 0x00, 0x36};
 
-    warden::WardenModuleCatalogBuilder builder;
-    CHECK(builder.Add(profile) ==
+    auto validateOne = [](warden::ModuleProfile const& candidate)
+    {
+        warden::WardenModuleCatalogBuilder builder;
+        return builder.Add(candidate);
+    };
+
+    profile.assurance = warden::ModuleAssurance::StaticVerified;
+    CHECK(validateOne(profile) == warden::ModuleCatalogValidation::Valid);
+
+    profile.assurance = warden::ModuleAssurance::ExactClientLabValidated;
+    CHECK(validateOne(profile) == warden::ModuleCatalogValidation::Valid);
+
+    profile.assurance = warden::ModuleAssurance::ProductionApproved;
+    CHECK(validateOne(profile) ==
         warden::ModuleCatalogValidation::InvalidMetadata);
+
+    profile.operatingMode =
+        warden::ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.checkCodes = {0xEA, 0x00, 0x00, 0x00};
+    CHECK(validateOne(profile) ==
+        warden::ModuleCatalogValidation::InvalidMetadata);
+}
+
+TEST(WardenModuleCatalog_requires_the_supported_x64_full_check_code_map)
+{
+    auto validateOne = [](warden::ModuleCheckCodes const& codes)
+    {
+        warden::ModuleProfile profile =
+            SyntheticProfile(warden::WardenArchitecture::X64);
+        profile.operatingMode = warden::ModuleOperatingMode::Full;
+        profile.checkCodes = codes;
+        warden::WardenModuleCatalogBuilder builder;
+        return builder.Add(profile);
+    };
+
+    warden::ModuleCheckCodes const valid = {0xEA, 0x51, 0x00, 0x36};
+    CHECK(validateOne(valid) == warden::ModuleCatalogValidation::Valid);
+
+    std::array<warden::ModuleCheckCodes, 4> const substitutions = {{
+        {0xEB, 0x51, 0x00, 0x36},
+        {0xEA, 0x50, 0x00, 0x36},
+        {0xEA, 0x51, 0x01, 0x36},
+        {0xEA, 0x51, 0x00, 0x37}}};
+    for (warden::ModuleCheckCodes const& codes : substitutions)
+    {
+        CHECK(validateOne(codes) ==
+            warden::ModuleCatalogValidation::InvalidCheckCodeMap);
+    }
+
+    std::array<warden::ModuleCheckCodes, 6> const duplicates = {{
+        {0xEA, 0xEA, 0x00, 0x36},
+        {0xEA, 0x51, 0xEA, 0x36},
+        {0xEA, 0x51, 0x00, 0xEA},
+        {0xEA, 0x51, 0x51, 0x36},
+        {0xEA, 0x51, 0x00, 0x51},
+        {0xEA, 0x51, 0x36, 0x36}}};
+    for (warden::ModuleCheckCodes const& codes : duplicates)
+    {
+        CHECK(validateOne(codes) ==
+            warden::ModuleCatalogValidation::DuplicateCheckCode);
+    }
 }
 
 TEST(WardenModuleCatalog_rejects_duplicate_nonzero_check_codes)
@@ -311,8 +370,7 @@ TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
     CHECK(x64.key.architecture == warden::WardenArchitecture::X64);
     CHECK(x64.abi == warden::ModuleAbi::Cata15595X64);
     CHECK(x64.provenance == warden::ModuleProvenance::SignedCrossBuild);
-    CHECK(x64.operatingMode ==
-        warden::ModuleOperatingMode::CompatibilityProbeOnly);
+    CHECK(x64.operatingMode == warden::ModuleOperatingMode::Full);
     CHECK(x64.assurance == warden::ModuleAssurance::StaticVerified);
     CHECK_EQ(x64.declaredSize, uint32(24405));
     CHECK_EQ(x64.container.size(), size_t(24405));
@@ -331,11 +389,10 @@ TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
     CHECK_HEX(x64.rekey.serverToClient.data(),
         x64.rekey.serverToClient.size(),
         "1b12c1eab47a79a32b3f8f7b3c985912");
-    CHECK_EQ(x64.checkCodes.timing,
-        warden::CataX64CompatibilityTimingCode);
-    CHECK_EQ(x64.checkCodes.lua, uint8(0));
+    CHECK_EQ(x64.checkCodes.timing, uint8(0xEA));
+    CHECK_EQ(x64.checkCodes.lua, uint8(0x51));
     CHECK_EQ(x64.checkCodes.mpq, uint8(0));
-    CHECK_EQ(x64.checkCodes.memory, uint8(0));
+    CHECK_EQ(x64.checkCodes.memory, uint8(0x36));
 
     warden::WardenModuleCatalog catalog;
     CHECK(BuildProfiles({x86, x64}, catalog) ==

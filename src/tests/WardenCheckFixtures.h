@@ -108,7 +108,9 @@ inline std::vector<WardenCheckRowInput> ProfileProbeRows(
             WardenCheckType::Mem, 10 * (index + 1),
             WardenEvidenceClass::Corroboration, PhaseProfileProbe,
             WardenAddressKind::ModuleRelativeRva);
-        row.moduleHex = "576F772E657865"; // Wow.exe
+        row.moduleHex = architecture == WardenArchitecture::X86 ?
+            "576F772E657865" :       // Wow.exe
+            "576F772D36342E657865";  // Wow-64.exe
         row.address = addresses[index];
         row.length = lengths[index];
         // Probe bytes are classified against the complete columns below.
@@ -131,6 +133,29 @@ inline std::vector<WardenCheckRowInput> ClassifiedRows(
         PhaseInitial | PhaseRecurring, WardenAddressKind::None);
     rows.push_back(timing);
 
+    if (architecture == WardenArchitecture::X64)
+    {
+        WardenCheckRowInput lua = MakeRow(architecture, variant, 2002,
+            WardenCheckType::Lua, 20, WardenEvidenceClass::Corroboration,
+            PhaseInitial | PhaseRecurring, WardenAddressKind::None);
+        lua.requestHex = "4F4B4159";   // OKAY
+        lua.expectedHex = "4F6B6179";  // Okay
+        rows.push_back(lua);
+
+        WardenCheckRowInput invariant = MakeRow(architecture, variant, 2003,
+            WardenCheckType::Mem, 30,
+            WardenEvidenceClass::IntegrityInvariant,
+            PhaseInitial | PhaseRecurring | PhaseAggressive,
+            WardenAddressKind::ModuleRelativeRva);
+        invariant.moduleHex = "576F772D36342E657865"; // Wow-64.exe
+        invariant.address = 0x00566C13;
+        invariant.length = 16;
+        invariant.expectedHex =
+            "4883C9FF33C0488BFDBAF0D8FFFFF2AE";
+        rows.push_back(invariant);
+        return rows;
+    }
+
     WardenCheckRowInput invariant = MakeRow(architecture, variant, 2002,
         WardenCheckType::Mem, 20,
         WardenEvidenceClass::IntegrityInvariant,
@@ -145,7 +170,9 @@ inline std::vector<WardenCheckRowInput> ClassifiedRows(
     WardenCheckRowInput corroboration = MakeRow(architecture, variant, 2003,
         WardenCheckType::Mem, 30, WardenEvidenceClass::Corroboration,
         PhaseRecurring, WardenAddressKind::ModuleRelativeRva);
-    corroboration.moduleHex = "576F772E657865";
+    corroboration.moduleHex = architecture == WardenArchitecture::X86 ?
+        "576F772E657865" :       // Wow.exe
+        "576F772D36342E657865";  // Wow-64.exe
     corroboration.address = 0x1000;
     corroboration.length = 2;
     corroboration.expectedHex = "4D5A";
@@ -206,14 +233,13 @@ inline ModuleProfile SyntheticModuleProfile(WardenArchitecture architecture)
     profile.provenance = architecture == WardenArchitecture::X86 ?
         ModuleProvenance::BuildMatchedPublic :
         ModuleProvenance::SignedCrossBuild;
-    profile.operatingMode = architecture == WardenArchitecture::X86 ?
-        ModuleOperatingMode::Full :
-        ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.operatingMode = ModuleOperatingMode::Full;
     profile.assurance = ModuleAssurance::StaticVerified;
     profile.checkCodes = architecture == WardenArchitecture::X86 ?
         ModuleCheckCodes{Cata15595X86TimingCode, Cata15595X86LuaCode,
             0, Cata15595X86MemoryCode} :
-        ModuleCheckCodes{CataX64CompatibilityTimingCode, 0, 0, 0};
+        ModuleCheckCodes{Cata15595X64TimingCode, Cata15595X64LuaCode,
+            0, Cata15595X64MemoryCode};
     if (architecture == WardenArchitecture::X86)
     {
         profile.rekey.seed = {{
@@ -295,9 +321,18 @@ inline WardenModuleCatalog BuildSyntheticModuleCatalog()
 
 inline std::vector<WardenCheckRowInput> CompleteSyntheticRows()
 {
-    // The x64 module is compatibility-probe-only, so publishing any x64
-    // database profile would violate the runtime containment contract.
-    return CompleteX86Rows();
+    std::vector<WardenCheckRowInput> rows = CompleteX86Rows();
+    std::vector<WardenCheckRowInput> x64 =
+        ProfileProbeRows(WardenArchitecture::X64);
+    for (ClientVariant variant :
+        {ClientVariant::Stock, ClientVariant::Grunt})
+    {
+        std::vector<WardenCheckRowInput> classified =
+            ClassifiedRows(WardenArchitecture::X64, variant);
+        x64.insert(x64.end(), classified.begin(), classified.end());
+    }
+    rows.insert(rows.end(), x64.begin(), x64.end());
+    return rows;
 }
 
 inline WardenCheckCatalog BuildSyntheticCheckCatalog()

@@ -67,7 +67,7 @@ TEST(WardenManager_rejects_empty_staging_without_consuming_the_slot)
     CHECK(manager.StageCatalogues(std::move(complete)));
 }
 
-TEST(WardenManager_requires_staging_and_observe_for_provisional_modules)
+TEST(WardenManager_requires_staging_and_observe_for_nonproduction_modules)
 {
     warden::WardenManager manager;
     warden::WardenConfiguration observe;

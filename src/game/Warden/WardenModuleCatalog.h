@@ -79,7 +79,14 @@ struct ModuleCheckCodes
     uint8 memory = 0;
 };
 
-constexpr uint8 CataX64CompatibilityTimingCode = 0xEA;
+constexpr uint8 Cata15595X64TimingCode = 0xEA;
+constexpr uint8 Cata15595X64LuaCode = 0x51;
+constexpr uint8 Cata15595X64MemoryCode = 0x36;
+constexpr uint8 Cata15595X64EndCode = 0x00;
+// Compatibility-probe sessions use the same audited timing command while
+// deliberately withholding every broader check family.
+constexpr uint8 CataX64CompatibilityTimingCode =
+    Cata15595X64TimingCode;
 constexpr uint8 Cata15595X86TimingCode = 0xD0;
 constexpr uint8 Cata15595X86LuaCode = 0x41;
 // Decoder opcode retained as protocol evidence; the published 15595 profile

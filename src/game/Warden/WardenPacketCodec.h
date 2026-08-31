@@ -55,7 +55,7 @@ constexpr std::size_t ServerWardenLengthSize = 4;
 constexpr std::size_t MaxEncryptedServerBody =
     MaxServerWardenWireSize - NormalServerHeaderSize -
     ServerWardenLengthSize;
-constexpr std::size_t Cata15595X86CheckBufferSize = 512;
+constexpr std::size_t Cata15595CheckBufferSize = 512;
 
 struct DecodedClientFrame
 {
@@ -109,7 +109,6 @@ enum class ModuleDecodeStatus : uint8
     InvalidLength,
     InvalidChecksum,
     DigestMismatch,
-    ModuleReportedFailure,
     InvalidStatus,
     CryptoFailure
 };

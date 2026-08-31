@@ -1576,7 +1576,8 @@ warden::ModuleProfile BuildProfile()
     profile.abi = warden::ModuleAbi::Cata15595X64;
     profile.provenance = warden::ModuleProvenance::SignedCrossBuild;
     profile.operatingMode = warden::ModuleOperatingMode::Full;
-    profile.assurance = warden::ModuleAssurance::StaticVerified;
+    profile.assurance =
+        warden::ModuleAssurance::ExactClientLabValidated;
     profile.checkCodes = {
         warden::Cata15595X64TimingCode,
         warden::Cata15595X64LuaCode,

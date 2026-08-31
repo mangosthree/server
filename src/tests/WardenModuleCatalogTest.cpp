@@ -371,7 +371,8 @@ TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
     CHECK(x64.abi == warden::ModuleAbi::Cata15595X64);
     CHECK(x64.provenance == warden::ModuleProvenance::SignedCrossBuild);
     CHECK(x64.operatingMode == warden::ModuleOperatingMode::Full);
-    CHECK(x64.assurance == warden::ModuleAssurance::StaticVerified);
+    CHECK(x64.assurance ==
+        warden::ModuleAssurance::ExactClientLabValidated);
     CHECK_EQ(x64.declaredSize, uint32(24405));
     CHECK_EQ(x64.container.size(), size_t(24405));
     CHECK_HEX(x64.moduleId.data(), x64.moduleId.size(),

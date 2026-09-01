@@ -112,6 +112,8 @@ bool DecodeVariant(std::string const& input, warden::ClientVariant& output)
         output = warden::ClientVariant::Stock;
     else if (value == "grunt")
         output = warden::ClientVariant::Grunt;
+    else if (value == "legacy-grunt")
+        output = warden::ClientVariant::LegacyGrunt;
     else
         return false;
     return true;
@@ -191,8 +193,7 @@ bool IsLegalWardenEvidenceClass(WardenCheckType type,
         case WardenCheckType::Lua:
             return evidenceClass == WardenEvidenceClass::Corroboration;
         case WardenCheckType::Mpq:
-            return evidenceClass == WardenEvidenceClass::IntegrityInvariant ||
-                evidenceClass == WardenEvidenceClass::Corroboration;
+            return evidenceClass == WardenEvidenceClass::Corroboration;
         case WardenCheckType::Mem:
             return evidenceClass == WardenEvidenceClass::IntegrityInvariant ||
                 evidenceClass == WardenEvidenceClass::ThreatSignature ||
@@ -226,7 +227,9 @@ WardenCheckType GetWardenCheckType(WardenCheckDefinition const& definition)
 
 bool IsConfirmationEligible(WardenCheckDefinition const& definition)
 {
-    return GetWardenCheckType(definition) != WardenCheckType::Timing &&
+    WardenCheckType const type = GetWardenCheckType(definition);
+    return type != WardenCheckType::Timing &&
+        IsLegalWardenEvidenceClass(type, definition.evidenceClass) &&
         IsActionableEvidenceClass(definition.evidenceClass);
 }
 
@@ -270,6 +273,16 @@ CheckCatalogValidation WardenCheckCatalogBuilder::Add(
         return diagnostic.validation;
     }
     if (!DecodeVariant(input.variantHex, key.variant))
+    {
+        SetDiagnostic(diagnostic, CheckCatalogValidation::InvalidVariant, key,
+            input.checkId);
+        return diagnostic.validation;
+    }
+    // The pre-adapter x86 Grunt image remains a supported exact profile. The
+    // similarly named x64 value denotes a known damaged patch and is audit
+    // vocabulary only, never a selectable catalogue key.
+    if (key.variant == ClientVariant::LegacyGrunt &&
+        key.architecture != WardenArchitecture::X86)
     {
         SetDiagnostic(diagnostic, CheckCatalogValidation::InvalidVariant, key,
             input.checkId);
@@ -387,6 +400,12 @@ CheckCatalogValidation WardenCheckCatalogBuilder::Add(
         }
         case WardenCheckType::Mpq:
         {
+            if (key.architecture == WardenArchitecture::X86 &&
+                key.variant != ClientVariant::Grunt)
+            {
+                return fail(
+                    CheckCatalogValidation::UnsupportedCheckForProfile);
+            }
             if (addressKind != WardenAddressKind::None || input.address ||
                 input.length || !input.moduleHex.empty())
                 return fail(CheckCatalogValidation::InvalidUnusedField);

@@ -170,12 +170,12 @@ ModuleCatalogValidation WardenModuleCatalogBuilder::Add(
             (profile.abi == ModuleAbi::Cata15595X86 &&
                 profile.checkCodes.timing == Cata15595X86TimingCode &&
                 profile.checkCodes.lua == Cata15595X86LuaCode &&
-                profile.checkCodes.mpq == 0 &&
+                profile.checkCodes.mpq == Cata15595X86MpqCode &&
                 profile.checkCodes.memory == Cata15595X86MemoryCode) ||
             (profile.abi == ModuleAbi::Cata15595X64 &&
                 profile.checkCodes.timing == Cata15595X64TimingCode &&
                 profile.checkCodes.lua == Cata15595X64LuaCode &&
-                profile.checkCodes.mpq == 0 &&
+                profile.checkCodes.mpq == Cata15595X64MpqCode &&
                 profile.checkCodes.memory == Cata15595X64MemoryCode);
     }
     else if (profile.operatingMode ==

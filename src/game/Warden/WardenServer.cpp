@@ -34,6 +34,7 @@
 #include <limits>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace
 {
@@ -535,8 +536,18 @@ bool WardenServer::SendModuleInitialization()
     if (!m_module)
         return false;
     Bytes initialization;
-    return EncodeModuleInitialization(m_module->abi, initialization) ==
+    return EncodeModuleInitialization(*m_module, initialization) ==
             EncodeStatus::Ok &&
+        SendPlain(std::move(initialization));
+}
+
+bool WardenServer::SendDeferredFilesystemInitialization()
+{
+    if (!m_module)
+        return false;
+    Bytes initialization;
+    return EncodeDeferredFilesystemInitialization(
+               *m_module, m_variant, initialization) == EncodeStatus::Ok &&
         SendPlain(std::move(initialization));
 }
 
@@ -568,9 +579,12 @@ bool WardenServer::HasCompleteSelectedProfiles() const
 
     std::array<char, 4> locale{};
     std::copy(m_locale.begin(), m_locale.end(), locale.begin());
-    for (ClientVariant variant :
-        {ClientVariant::Unclassified, ClientVariant::Stock,
-            ClientVariant::Grunt})
+    std::vector<ClientVariant> variants = {
+        ClientVariant::Unclassified, ClientVariant::Stock,
+        ClientVariant::Grunt};
+    if (m_architecture == WardenArchitecture::X86)
+        variants.push_back(ClientVariant::LegacyGrunt);
+    for (ClientVariant variant : variants)
     {
         if (!m_checks->FindProfileExact(
                 {m_build, m_architecture, locale, variant}))
@@ -957,7 +971,11 @@ void WardenServer::CompleteProfileProbe(std::vector<Bytes>&& results)
     // Preserve recognized-but-unsupported variants in the terminal lifecycle
     // event so the adapter can persist only their bounded audit token.
     m_variant = variant;
-    if (variant != ClientVariant::Stock && variant != ClientVariant::Grunt)
+    bool const selectable = variant == ClientVariant::Stock ||
+        variant == ClientVariant::Grunt ||
+        (m_architecture == WardenArchitecture::X86 &&
+            variant == ClientVariant::LegacyGrunt);
+    if (!selectable)
     {
         Fail(WardenFailure::ProfileUnclassified);
         return;
@@ -973,6 +991,16 @@ void WardenServer::CompleteProfileProbe(std::vector<Bytes>&& results)
     Transition(WardenState::ProfileClassified);
     if (m_state == WardenState::Failed)
         return;
+    // The initial x86 command 3 deliberately withholds filesystem callbacks.
+    // Install them only after the fourth probe proves the exact current-Grunt
+    // adapter; stock and legacy clients never receive this record.
+    if (m_architecture == WardenArchitecture::X86 &&
+        variant == ClientVariant::Grunt &&
+        !SendDeferredFilesystemInitialization())
+    {
+        Fail(WardenFailure::SendFailure);
+        return;
+    }
     if (!BuildPendingPlan(CheckPlanPurpose::Initial))
         Fail(WardenFailure::UnsupportedProfile);
 }

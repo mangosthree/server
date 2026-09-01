@@ -33,6 +33,7 @@
 #include <array>
 #include <cstddef>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace warden
@@ -93,15 +94,16 @@ inline WardenCheckRowInput MakeRow(WardenArchitecture architecture,
 inline std::vector<WardenCheckRowInput> ProfileProbeRows(
     WardenArchitecture architecture)
 {
-    std::array<uint64, 3> addresses = architecture == WardenArchitecture::X86 ?
-        std::array<uint64, 3>{{0x00007F7A, 0x00088FAE, 0x000895CA}} :
-        std::array<uint64, 3>{{0x000AB76F, 0x000AABAB, 0x000AA6D3}};
-    std::array<uint32, 3> lengths = architecture == WardenArchitecture::X86 ?
-        std::array<uint32, 3>{{5, 1, 7}} :
-        std::array<uint32, 3>{{5, 2, 2}};
+    std::vector<uint64> addresses = architecture == WardenArchitecture::X86 ?
+        std::vector<uint64>{0x00007F7A, 0x00088FAE, 0x000895CA,
+            0x003BFF88} :
+        std::vector<uint64>{0x000AB76F, 0x000AABAB, 0x000AA6D3};
+    std::vector<uint32> lengths = architecture == WardenArchitecture::X86 ?
+        std::vector<uint32>{5, 1, 7, 24} :
+        std::vector<uint32>{5, 2, 2};
 
     std::vector<WardenCheckRowInput> rows;
-    for (uint32 index = 0; index < 3; ++index)
+    for (uint32 index = 0; index < addresses.size(); ++index)
     {
         WardenCheckRowInput row = MakeRow(architecture,
             ClientVariant::Unclassified, 1001 + index,
@@ -132,6 +134,19 @@ inline std::vector<WardenCheckRowInput> ClassifiedRows(
         WardenEvidenceClass::ProtocolHealth,
         PhaseInitial | PhaseRecurring, WardenAddressKind::None);
     rows.push_back(timing);
+
+    if (architecture == WardenArchitecture::X86 &&
+        variant == ClientVariant::Grunt)
+    {
+        WardenCheckRowInput mpq = MakeRow(architecture, variant, 2004,
+            WardenCheckType::Mpq, 25, WardenEvidenceClass::Corroboration,
+            PhaseInitial | PhaseRecurring, WardenAddressKind::None);
+        mpq.requestHex =
+            "444246696C6573436C69656E745C4974656D2E646232";
+        mpq.expectedHex =
+            "4706FF83D9B611644A87DE79C244B414612EF4F2";
+        rows.push_back(std::move(mpq));
+    }
 
     if (architecture == WardenArchitecture::X64)
     {
@@ -186,7 +201,8 @@ inline std::vector<WardenCheckRowInput> CompleteX86Rows()
     std::vector<WardenCheckRowInput> rows =
         ProfileProbeRows(WardenArchitecture::X86);
     for (ClientVariant variant :
-        {ClientVariant::Stock, ClientVariant::Grunt})
+        {ClientVariant::Stock, ClientVariant::LegacyGrunt,
+            ClientVariant::Grunt})
     {
         std::vector<WardenCheckRowInput> classified =
             ClassifiedRows(WardenArchitecture::X86, variant);
@@ -237,9 +253,9 @@ inline ModuleProfile SyntheticModuleProfile(WardenArchitecture architecture)
     profile.assurance = ModuleAssurance::StaticVerified;
     profile.checkCodes = architecture == WardenArchitecture::X86 ?
         ModuleCheckCodes{Cata15595X86TimingCode, Cata15595X86LuaCode,
-            0, Cata15595X86MemoryCode} :
+            Cata15595X86MpqCode, Cata15595X86MemoryCode} :
         ModuleCheckCodes{Cata15595X64TimingCode, Cata15595X64LuaCode,
-            0, Cata15595X64MemoryCode};
+            Cata15595X64MpqCode, Cata15595X64MemoryCode};
     if (architecture == WardenArchitecture::X86)
     {
         profile.rekey.seed = {{
@@ -354,13 +370,24 @@ inline WardenCheckCatalog BuildSyntheticCheckCatalog()
 inline std::vector<Bytes> X86StockFingerprint()
 {
     return {{0xE8, 0xB1, 0xED, 0xFF, 0xFF}, {0x74},
-        {0x8B, 0x55, 0x0C, 0x83, 0xFA, 0x02, 0x75}};
+        {0x8B, 0x55, 0x0C, 0x83, 0xFA, 0x02, 0x75},
+        Bytes(24, 0xCC)};
+}
+
+inline std::vector<Bytes> X86LegacyGruntFingerprint()
+{
+    return {{0xB8, 0x01, 0x00, 0x00, 0x00}, {0xEB},
+        {0xBA, 0x00, 0x00, 0x00, 0x00, 0x90, 0xEB},
+        Bytes(24, 0xCC)};
 }
 
 inline std::vector<Bytes> X86GruntFingerprint()
 {
     return {{0xB8, 0x01, 0x00, 0x00, 0x00}, {0xEB},
-        {0xBA, 0x00, 0x00, 0x00, 0x00, 0x90, 0xEB}};
+        {0xBA, 0x00, 0x00, 0x00, 0x00, 0x90, 0xEB},
+        {0x55, 0x8B, 0xEC, 0xFF, 0x75, 0x14, 0xFF, 0x75,
+            0x10, 0xFF, 0x75, 0x0C, 0xFF, 0x75, 0x08, 0xE8,
+            0xB4, 0x65, 0xFE, 0xFF, 0x5D, 0xC2, 0x14, 0x00}};
 }
 
 inline std::vector<Bytes> X64StockFingerprint()

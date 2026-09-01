@@ -216,9 +216,11 @@ require_text(REVISIONS_TEXT
     "#define REALMD_DB_UPDATE_DESCRIPT   \"Cata Warden identity\""
     "Realm description requirement is stale")
 require_text(REVISIONS_TEXT "#define WORLD_DB_STRUCTURE_NR       \"10\""
-    "World structure requirement must be 22/10/001")
+    "World structure requirement must be 22/10/003")
+require_text(REVISIONS_TEXT "#define WORLD_DB_CONTENT_NR         \"3\""
+    "World content requirement must be 22/10/003")
 require_text(REVISIONS_TEXT
-    "#define WORLD_DB_UPDATE_DESCRIPT    \"Cata_Warden_Checks\""
+    "#define WORLD_DB_UPDATE_DESCRIPT    \"Cata_Warden_MPQ_Checks\""
     "World description requirement is stale")
 require_text(WORLD_CONFIG_TEXT "bool World::LoadConfigSettings(bool reload)"
     "configuration reload must report rejection")

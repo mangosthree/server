@@ -66,6 +66,7 @@ bool HasCompleteVariantSet(
     bool unclassified = false;
     bool stock = false;
     bool grunt = false;
+    bool legacyGrunt = false;
     std::size_t count = 0;
     for (warden::WardenCheckProfile const& profile : profiles)
     {
@@ -83,11 +84,19 @@ bool HasCompleteVariantSet(
             case warden::ClientVariant::Grunt:
                 grunt = true;
                 break;
+            case warden::ClientVariant::LegacyGrunt:
+                if (key.architecture != warden::WardenArchitecture::X86)
+                    return false;
+                legacyGrunt = true;
+                break;
             default:
                 return false;
         }
     }
-    return count == 3 && unclassified && stock && grunt;
+    std::size_t const expectedCount =
+        key.architecture == warden::WardenArchitecture::X86 ? 4u : 3u;
+    return count == expectedCount && unclassified && stock && grunt &&
+        (key.architecture != warden::WardenArchitecture::X86 || legacyGrunt);
 }
 
 bool IsValidInterval(uint32 minimum, uint32 maximum)

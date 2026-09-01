@@ -70,7 +70,7 @@ TEST(WardenCheckCatalog_publishes_only_exact_cata_profile_keys)
 {
     warden::WardenCheckCatalog const catalog =
         warden::test::BuildX86Catalog();
-    CHECK_EQ(catalog.Profiles().size(), size_t(3));
+    CHECK_EQ(catalog.Profiles().size(), size_t(4));
 
     warden::WardenProfileKey const stock = {15595,
         warden::WardenArchitecture::X86, warden::test::EnUsLocale(),
@@ -84,6 +84,9 @@ TEST(WardenCheckCatalog_publishes_only_exact_cata_profile_keys)
         {{'e', 'n', 'G', 'B'}}, warden::ClientVariant::Stock}) == nullptr);
     CHECK(catalog.FindProfileExact({15595, warden::WardenArchitecture::X86,
         warden::test::EnUsLocale(), warden::ClientVariant::Grunt}) != nullptr);
+    CHECK(catalog.FindProfileExact({15595, warden::WardenArchitecture::X86,
+        warden::test::EnUsLocale(),
+        warden::ClientVariant::LegacyGrunt}) != nullptr);
 }
 
 TEST(WardenCheckCatalog_rejects_unknown_identity_and_wildcards)
@@ -120,9 +123,14 @@ TEST(WardenCheckCatalog_rejects_unknown_identity_and_wildcards)
     CHECK(AddOne(row) == warden::CheckCatalogValidation::InvalidVariant);
 }
 
-TEST(WardenCheckCatalog_never_makes_legacy_grunt_selectable)
+TEST(WardenCheckCatalog_selects_legacy_grunt_only_for_x86)
 {
     warden::WardenCheckRowInput row =
+        warden::test::ClassifiedRows(warden::WardenArchitecture::X86,
+            warden::ClientVariant::LegacyGrunt)[1];
+    CHECK(AddOne(row) == warden::CheckCatalogValidation::Valid);
+
+    row =
         warden::test::ClassifiedRows(warden::WardenArchitecture::X64,
             warden::ClientVariant::LegacyGrunt)[1];
     CHECK(AddOne(row) ==
@@ -177,6 +185,45 @@ TEST(WardenCheckCatalog_rejects_non_textual_module_identifiers)
     row.moduleHex = "576F772E1F657865";
     CHECK(AddOne(row) ==
         warden::CheckCatalogValidation::InvalidModuleIdentifier);
+}
+
+TEST(WardenCheckCatalog_mpq_evidence_is_corroboration_only)
+{
+    warden::WardenCheckRowInput row = warden::test::MakeRow(
+        warden::WardenArchitecture::X86, warden::ClientVariant::Stock,
+        2004, warden::WardenCheckType::Mpq, 35,
+        warden::WardenEvidenceClass::IntegrityInvariant,
+        warden::PhaseInitial | warden::PhaseRecurring,
+        warden::WardenAddressKind::None);
+    row.requestHex = "444246696C6573436C69656E745C4974656D2E646232";
+    row.expectedHex = "4706FF83D9B611644A87DE79C244B414612EF4F2";
+
+    CHECK(!warden::IsLegalWardenEvidenceClass(warden::WardenCheckType::Mpq,
+        warden::WardenEvidenceClass::IntegrityInvariant));
+    CHECK(AddOne(row) ==
+        warden::CheckCatalogValidation::IllegalTypeEvidenceClass);
+
+    warden::WardenCheckDefinition definition;
+    definition.evidenceClass =
+        warden::WardenEvidenceClass::IntegrityInvariant;
+    definition.payload = warden::MpqCheckProfile{2004,
+        "DBFilesClient\\Item.db2", {}};
+    CHECK(!warden::IsConfirmationEligible(definition));
+
+    row.evidenceClass = static_cast<uint32>(
+        warden::WardenEvidenceClass::Corroboration);
+    CHECK(warden::IsLegalWardenEvidenceClass(warden::WardenCheckType::Mpq,
+        warden::WardenEvidenceClass::Corroboration));
+    CHECK(AddOne(row) ==
+        warden::CheckCatalogValidation::UnsupportedCheckForProfile);
+
+    row.variantHex =
+        warden::test::VariantHex(warden::ClientVariant::LegacyGrunt);
+    CHECK(AddOne(row) ==
+        warden::CheckCatalogValidation::UnsupportedCheckForProfile);
+
+    row.variantHex = warden::test::VariantHex(warden::ClientVariant::Grunt);
+    CHECK(AddOne(row) == warden::CheckCatalogValidation::Valid);
 }
 
 TEST(WardenCheckCatalog_profile_probe_is_exclusive_unclassified_and_non_actionable)
@@ -292,14 +339,14 @@ TEST(WardenCheckCatalog_rejects_request_preflight_overflow)
 TEST(WardenCheckCatalog_build_is_atomic_on_validation_failure)
 {
     warden::WardenCheckCatalog catalog = warden::test::BuildX86Catalog();
-    REQUIRE(catalog.Profiles().size() == 3u);
+    REQUIRE(catalog.Profiles().size() == 4u);
 
     std::vector<warden::WardenCheckRowInput> rows =
         warden::test::CompleteX86Rows();
     rows[1].sortOrder = rows[0].sortOrder;
     CHECK(BuildRows(rows, catalog) ==
         warden::CheckCatalogValidation::DuplicateSortOrder);
-    CHECK_EQ(catalog.Profiles().size(), size_t(3));
+    CHECK_EQ(catalog.Profiles().size(), size_t(4));
     CHECK(catalog.FindProfileExact({15595, warden::WardenArchitecture::X86,
         warden::test::EnUsLocale(), warden::ClientVariant::Stock}) != nullptr);
 }
@@ -360,7 +407,7 @@ TEST(WardenCheckCatalogLoader_publishes_only_a_complete_valid_snapshot)
     CHECK(transaction.Finish(modules,
         [&published](std::shared_ptr<warden::WardenCheckCatalog const> const& snapshot)
         {
-            published = snapshot && snapshot->Profiles().size() == 6u;
+            published = snapshot && snapshot->Profiles().size() == 7u;
             return published;
         }, diagnostic) == warden::WardenCheckCatalogLoadFailure::None);
     CHECK(published);

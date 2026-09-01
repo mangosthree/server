@@ -53,7 +53,7 @@ warden::ModuleProfile SyntheticProfile(warden::WardenArchitecture architecture)
         profile.checkCodes = {
             warden::Cata15595X86TimingCode,
             warden::Cata15595X86LuaCode,
-            0,
+            warden::Cata15595X86MpqCode,
             warden::Cata15595X86MemoryCode};
     else
         profile.checkCodes = {0xEA, 0x00, 0x00, 0x00};
@@ -136,7 +136,7 @@ TEST(WardenModuleCatalog_allows_signed_cross_build_full_below_production_assuran
     warden::ModuleProfile profile =
         SyntheticProfile(warden::WardenArchitecture::X64);
     profile.operatingMode = warden::ModuleOperatingMode::Full;
-    profile.checkCodes = {0xEA, 0x51, 0x00, 0x36};
+    profile.checkCodes = {0xEA, 0x51, 0x90, 0x36};
 
     auto validateOne = [](warden::ModuleProfile const& candidate)
     {
@@ -173,14 +173,14 @@ TEST(WardenModuleCatalog_requires_the_supported_x64_full_check_code_map)
         return builder.Add(profile);
     };
 
-    warden::ModuleCheckCodes const valid = {0xEA, 0x51, 0x00, 0x36};
+    warden::ModuleCheckCodes const valid = {0xEA, 0x51, 0x90, 0x36};
     CHECK(validateOne(valid) == warden::ModuleCatalogValidation::Valid);
 
     std::array<warden::ModuleCheckCodes, 4> const substitutions = {{
-        {0xEB, 0x51, 0x00, 0x36},
-        {0xEA, 0x50, 0x00, 0x36},
-        {0xEA, 0x51, 0x01, 0x36},
-        {0xEA, 0x51, 0x00, 0x37}}};
+        {0xEB, 0x51, 0x90, 0x36},
+        {0xEA, 0x50, 0x90, 0x36},
+        {0xEA, 0x51, 0x91, 0x36},
+        {0xEA, 0x51, 0x90, 0x37}}};
     for (warden::ModuleCheckCodes const& codes : substitutions)
     {
         CHECK(validateOne(codes) ==
@@ -188,11 +188,11 @@ TEST(WardenModuleCatalog_requires_the_supported_x64_full_check_code_map)
     }
 
     std::array<warden::ModuleCheckCodes, 6> const duplicates = {{
-        {0xEA, 0xEA, 0x00, 0x36},
+        {0xEA, 0xEA, 0x90, 0x36},
         {0xEA, 0x51, 0xEA, 0x36},
-        {0xEA, 0x51, 0x00, 0xEA},
+        {0xEA, 0x51, 0x90, 0xEA},
         {0xEA, 0x51, 0x51, 0x36},
-        {0xEA, 0x51, 0x00, 0x51},
+        {0xEA, 0x51, 0x90, 0x51},
         {0xEA, 0x51, 0x36, 0x36}}};
     for (warden::ModuleCheckCodes const& codes : duplicates)
     {
@@ -215,7 +215,7 @@ TEST(WardenModuleCatalog_requires_the_supported_x86_check_code_map)
 {
     warden::ModuleProfile profile =
         SyntheticProfile(warden::WardenArchitecture::X86);
-    profile.checkCodes.memory = 0;
+    profile.checkCodes.mpq = 0;
 
     warden::WardenModuleCatalogBuilder missingCode;
     CHECK(missingCode.Add(profile) ==
@@ -228,9 +228,9 @@ TEST(WardenModuleCatalog_requires_the_supported_x86_check_code_map)
         warden::ModuleCatalogValidation::InvalidCheckCodeMap);
 
     profile = SyntheticProfile(warden::WardenArchitecture::X86);
-    profile.checkCodes.mpq = warden::Cata15595X86MpqCode;
-    warden::WardenModuleCatalogBuilder unsupportedMpq;
-    CHECK(unsupportedMpq.Add(profile) ==
+    profile.checkCodes.mpq ^= 0x01;
+    warden::WardenModuleCatalogBuilder wrongMpqCode;
+    CHECK(wrongMpqCode.Add(profile) ==
         warden::ModuleCatalogValidation::InvalidCheckCodeMap);
 }
 
@@ -361,7 +361,7 @@ TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
         "6aea6e524748f22d122b27d96622d765");
     CHECK_EQ(x86.checkCodes.timing, warden::Cata15595X86TimingCode);
     CHECK_EQ(x86.checkCodes.lua, warden::Cata15595X86LuaCode);
-    CHECK_EQ(x86.checkCodes.mpq, uint8(0));
+    CHECK_EQ(x86.checkCodes.mpq, warden::Cata15595X86MpqCode);
     CHECK_EQ(x86.checkCodes.memory, warden::Cata15595X86MemoryCode);
 
     warden::ModuleProfile const& x64 =
@@ -392,7 +392,7 @@ TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
         "1b12c1eab47a79a32b3f8f7b3c985912");
     CHECK_EQ(x64.checkCodes.timing, uint8(0xEA));
     CHECK_EQ(x64.checkCodes.lua, uint8(0x51));
-    CHECK_EQ(x64.checkCodes.mpq, uint8(0));
+    CHECK_EQ(x64.checkCodes.mpq, warden::Cata15595X64MpqCode);
     CHECK_EQ(x64.checkCodes.memory, uint8(0x36));
 
     warden::WardenModuleCatalog catalog;

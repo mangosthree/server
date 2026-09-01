@@ -67,6 +67,8 @@ TEST(WardenIncidentContext_accepts_only_proven_actionable_profiles)
     CHECK(!warden::IsValidWardenIncidentContext(context));
     context = ValidIncident();
     context.variant = warden::ClientVariant::LegacyGrunt;
+    CHECK(warden::IsValidWardenIncidentContext(context));
+    context.architecture = warden::WardenArchitecture::X64;
     CHECK(!warden::IsValidWardenIncidentContext(context));
     context = ValidIncident();
     context.locale = {{'z', 'z', 'Z', 'Z'}};

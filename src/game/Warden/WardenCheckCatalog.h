@@ -195,7 +195,8 @@ enum class CheckCatalogValidation : uint8
     DuplicateSortOrder,
     EmptyCatalog,
     EmptyProfile,
-    PlanPreflightFailed
+    PlanPreflightFailed,
+    UnsupportedCheckForProfile
 };
 
 struct WardenCheckDiagnostic

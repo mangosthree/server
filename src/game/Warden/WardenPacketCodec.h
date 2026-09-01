@@ -167,7 +167,10 @@ FrameDecodeStatus DecodeClientFrame(
     ByteView payload, DecodedClientFrame& decoded);
 EncodeStatus EncodeServerFrame(
     ByteView encryptedBody, EncodedServerFrame& encoded);
-EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext);
+EncodeStatus EncodeModuleInitialization(
+    ModuleProfile const& profile, Bytes& plaintext);
+EncodeStatus EncodeDeferredFilesystemInitialization(
+    ModuleProfile const& profile, ClientVariant variant, Bytes& plaintext);
 EncodeStatus EncodeModuleHashRequest(
     ModuleProfile const& profile, Bytes& plaintext);
 ModuleDecodeStatus DecodeModuleHashResult(

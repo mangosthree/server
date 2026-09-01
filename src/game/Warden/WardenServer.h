@@ -146,6 +146,7 @@ private:
     bool SendModuleTransfer();
     bool SendModuleHashRequest();
     bool SendModuleInitialization();
+    bool SendDeferredFilesystemInitialization();
     bool SendCompatibilityTimingProbe();
     bool HasCompleteSelectedProfiles() const;
     bool BeginProfileProbe();

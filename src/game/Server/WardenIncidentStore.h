@@ -132,7 +132,9 @@ inline bool IsValidWardenIncidentContext(
             context.architecture == WardenArchitecture::X64) &&
         IsPublishedCataWardenLocale(context.locale) &&
         (context.variant == ClientVariant::Stock ||
-            context.variant == ClientVariant::Grunt) &&
+            context.variant == ClientVariant::Grunt ||
+            (context.architecture == WardenArchitecture::X86 &&
+                context.variant == ClientVariant::LegacyGrunt)) &&
         IsLegalWardenEvidenceClass(context.checkType,
             context.evidenceClass) &&
         IsActionableEvidenceClass(context.evidenceClass) &&

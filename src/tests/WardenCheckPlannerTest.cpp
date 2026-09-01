@@ -101,7 +101,7 @@ TEST(WardenCheckPlanner_builds_only_the_minimal_unclassified_profile_probe)
     CHECK(plan.purpose == warden::CheckPlanPurpose::ProfileProbe);
     CHECK(plan.profileKey.variant == warden::ClientVariant::Unclassified);
     CHECK(CheckIds(plan) ==
-        std::vector<uint32>({1001, 1002, 1003}));
+        std::vector<uint32>({1001, 1002, 1003, 1004}));
     for (warden::WardenCheckDefinition const& check : plan.checks)
     {
         CHECK(check.phaseMask == warden::PhaseProfileProbe);
@@ -236,14 +236,25 @@ TEST(WardenCheckPlanner_classifies_only_complete_x86_fingerprint_columns)
         results) == warden::ClientVariant::Grunt);
     CHECK(Cleansed(results));
 
+    results = warden::test::X86LegacyGruntFingerprint();
+    CHECK(warden::ClassifyProfileProbe(warden::WardenArchitecture::X86,
+        results) == warden::ClientVariant::LegacyGrunt);
+    CHECK(Cleansed(results));
+
     results = warden::test::X86StockFingerprint();
     results[1] = {0xEB};
     CHECK(warden::ClassifyProfileProbe(warden::WardenArchitecture::X86,
         results) == warden::ClientVariant::Unclassified);
     CHECK(Cleansed(results));
+
+    results = warden::test::X86GruntFingerprint();
+    results[3][0] ^= 0x01;
+    CHECK(warden::ClassifyProfileProbe(warden::WardenArchitecture::X86,
+        results) == warden::ClientVariant::Unclassified);
+    CHECK(Cleansed(results));
 }
 
-TEST(WardenCheckPlanner_recognizes_but_never_selects_legacy_grunt)
+TEST(WardenCheckPlanner_keeps_x64_legacy_grunt_as_a_nonselectable_fingerprint)
 {
     std::vector<warden::Bytes> results =
         warden::test::X64StockFingerprint();
@@ -268,10 +279,43 @@ TEST(WardenCheckPlanner_recognizes_but_never_selects_legacy_grunt)
     CHECK(Cleansed(results));
 }
 
+TEST(WardenCheckPlanner_selects_x86_legacy_profile_without_mpq)
+{
+    warden::WardenCheckCatalog const catalog =
+        warden::test::BuildX86Catalog();
+    warden::WardenCheckProfile const* legacy =
+        FindProfile(catalog, warden::ClientVariant::LegacyGrunt);
+    REQUIRE(legacy != nullptr);
+
+    warden::WardenCheckPlanner planner(*legacy);
+    warden::CheckPlan plan;
+    REQUIRE(planner.Build(warden::CheckPlanPurpose::Initial, 12, plan) ==
+        warden::CheckPlanValidation::Valid);
+    CHECK(plan.profileKey.variant == warden::ClientVariant::LegacyGrunt);
+    CHECK(std::none_of(plan.checks.begin(), plan.checks.end(),
+        [](warden::WardenCheckDefinition const& check)
+        {
+            return warden::GetWardenCheckType(check) ==
+                warden::WardenCheckType::Mpq;
+        }));
+}
+
 TEST(WardenCheckPlanner_rejects_wrong_probe_shape_and_cleanses_it)
 {
     std::vector<warden::Bytes> results = {{0x74}};
     CHECK(warden::ClassifyProfileProbe(warden::WardenArchitecture::X64,
+        results) == warden::ClientVariant::Unclassified);
+    CHECK(Cleansed(results));
+
+    results = warden::test::X86StockFingerprint();
+    results.pop_back();
+    CHECK(warden::ClassifyProfileProbe(warden::WardenArchitecture::X86,
+        results) == warden::ClientVariant::Unclassified);
+    CHECK(Cleansed(results));
+
+    results = warden::test::X86StockFingerprint();
+    results.push_back({0xCC});
+    CHECK(warden::ClassifyProfileProbe(warden::WardenArchitecture::X86,
         results) == warden::ClientVariant::Unclassified);
     CHECK(Cleansed(results));
 

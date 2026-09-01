@@ -350,8 +350,6 @@ warden::CheckPlanValidation AnalyzeCheckPlan(warden::ModuleAbi abi,
         if (warden::MpqCheckProfile const* mpq =
                 std::get_if<warden::MpqCheckProfile>(&definition.payload))
         {
-            if (abi == warden::ModuleAbi::Cata15595X64)
-                return warden::CheckPlanValidation::InvalidDefinition;
             if (definition.addressKind != warden::WardenAddressKind::None ||
                 !IsWireString(mpq->path))
             {
@@ -492,17 +490,37 @@ EncodeStatus EncodeServerFrame(
     return EncodeStatus::Ok;
 }
 
-EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext)
+EncodeStatus EncodeModuleInitialization(
+    ModuleProfile const& profile, Bytes& plaintext)
 {
     plaintext.clear();
-    switch (abi)
+
+    if (profile.operatingMode == ModuleOperatingMode::CompatibilityProbeOnly)
+    {
+        // The compatibility fallback deliberately registers only FrameXML and
+        // timing callbacks. It must never expose the broader filesystem ABI.
+        if (profile.abi != ModuleAbi::Cata15595X64)
+            return EncodeStatus::InvalidProfile;
+        static constexpr std::array<uint8, 34> Initialization = {{
+            0x03, 0x0C, 0x00, 0xF7, 0x17, 0xB3, 0x83,
+            0x04, 0x00, 0x00, 0x10, 0x81, 0x56, 0x00,
+            0xC0, 0x6B, 0x56, 0x00, 0x01,
+            0x03, 0x08, 0x00, 0x99, 0x06, 0x76, 0x7A, 0x01,
+            0x01, 0x00, 0x00, 0x25, 0x5B, 0x00, 0x01
+        }};
+        plaintext.assign(Initialization.begin(), Initialization.end());
+        return EncodeStatus::Ok;
+    }
+    if (profile.operatingMode != ModuleOperatingMode::Full)
+        return EncodeStatus::InvalidProfile;
+
+    switch (profile.abi)
     {
         case ModuleAbi::Cata15595X86:
         {
-            // The exact x86 client safely satisfies the FrameXML and timing
-            // callback ABIs. Its filesystem readers do not satisfy either
-            // stdcall shape exposed by this signed module, so no archive
-            // callback is registered.
+            // All x86 clients receive only the universally safe callbacks.
+            // The filesystem record is sent later, after the profile probe has
+            // proven the current Grunt adapter byte-for-byte.
             static constexpr std::array<uint8, 34> Initialization = {{
                 0x03, 0x0C, 0x00, 0xE9, 0xAB, 0x2B, 0xD1,
                 0x04, 0x00, 0x00, 0x10, 0xD3, 0x43, 0x00,
@@ -515,12 +533,17 @@ EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext)
         }
         case ModuleAbi::Cata15595X64:
         {
-            // The x64 candidate registers only the audited FrameXML and timing
-            // callbacks. Filesystem and arbitrary-Lua execution remain absent.
-            static constexpr std::array<uint8, 34> Initialization = {{
+            // Register only the audited FrameXML, family-2 filesystem and
+            // timing callback sets. Arbitrary-Lua execution remains excluded
+            // by the positive check-code map below.
+            static constexpr std::array<uint8, 61> Initialization = {{
                 0x03, 0x0C, 0x00, 0xF7, 0x17, 0xB3, 0x83,
                 0x04, 0x00, 0x00, 0x10, 0x81, 0x56, 0x00,
                 0xC0, 0x6B, 0x56, 0x00, 0x01,
+                0x03, 0x14, 0x00, 0x50, 0x56, 0xE5, 0xDB,
+                0x01, 0x00, 0x02, 0x00, 0x10, 0xEA, 0x49,
+                0x00, 0xF0, 0x9D, 0x49, 0x00, 0x50, 0xB5,
+                0x49, 0x00, 0x10, 0xB6, 0x49, 0x00,
                 0x03, 0x08, 0x00, 0x99, 0x06, 0x76, 0x7A, 0x01,
                 0x01, 0x00, 0x00, 0x25, 0x5B, 0x00, 0x01
             }};
@@ -530,6 +553,36 @@ EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext)
         default:
             return EncodeStatus::InvalidAbi;
     }
+}
+
+EncodeStatus EncodeDeferredFilesystemInitialization(
+    ModuleProfile const& profile, ClientVariant variant, Bytes& plaintext)
+{
+    plaintext.clear();
+    bool const exactCurrentGrunt =
+        profile.key.build == 15595 &&
+        profile.key.architecture == WardenArchitecture::X86 &&
+        profile.abi == ModuleAbi::Cata15595X86 &&
+        profile.operatingMode == ModuleOperatingMode::Full &&
+        profile.checkCodes.timing == Cata15595X86TimingCode &&
+        profile.checkCodes.lua == Cata15595X86LuaCode &&
+        profile.checkCodes.mpq == Cata15595X86MpqCode &&
+        profile.checkCodes.memory == Cata15595X86MemoryCode &&
+        variant == ClientVariant::Grunt;
+    if (!exactCurrentGrunt)
+        return EncodeStatus::InvalidProfile;
+
+    // Family 1 uses the exact archive open/size/close callbacks plus the
+    // probed adapter at RVA 0x003BFF88. The checksum covers only the 20-byte
+    // command-3 body and was reproduced independently from the module code.
+    static constexpr std::array<uint8, 27> Initialization = {{
+        0x03, 0x14, 0x00, 0x8F, 0x1F, 0x12, 0xAD,
+        0x01, 0x00, 0x01, 0x00, 0x50, 0x8C, 0x3A, 0x00,
+        0x70, 0x51, 0x3A, 0x00, 0x88, 0xFF, 0x3B, 0x00,
+        0x00, 0x66, 0x3A, 0x00
+    }};
+    plaintext.assign(Initialization.begin(), Initialization.end());
+    return EncodeStatus::Ok;
 }
 
 EncodeStatus EncodeModuleHashRequest(
@@ -625,28 +678,29 @@ EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
         (profile.abi == ModuleAbi::Cata15595X86 &&
             profile.checkCodes.timing == Cata15595X86TimingCode &&
             profile.checkCodes.lua == Cata15595X86LuaCode &&
-            profile.checkCodes.mpq == 0 &&
+            profile.checkCodes.mpq == Cata15595X86MpqCode &&
             profile.checkCodes.memory == Cata15595X86MemoryCode) ||
         (profile.abi == ModuleAbi::Cata15595X64 &&
             profile.checkCodes.timing == Cata15595X64TimingCode &&
             profile.checkCodes.lua == Cata15595X64LuaCode &&
-            profile.checkCodes.mpq == 0 &&
+            profile.checkCodes.mpq == Cata15595X64MpqCode &&
             profile.checkCodes.memory == Cata15595X64MemoryCode);
     if (!validCheckCodes)
     {
         return EncodeStatus::InvalidProfile;
     }
 
-    // This signed module recognizes an MPQ opcode, but build 15595 x86 has no
-    // host reader with the required calling convention and return contract.
-    // Reject the plan before it can reach the client even if a database row is
-    // added accidentally.
-    if (std::any_of(plan.checks.begin(), plan.checks.end(),
+    bool const hasMpq = std::any_of(plan.checks.begin(), plan.checks.end(),
             [](WardenCheckDefinition const& definition)
             {
                 return std::holds_alternative<MpqCheckProfile>(
                     definition.payload);
-            }))
+            });
+    // Only the exact current-Grunt probe establishes the adapter contract.
+    // Stock and legacy profiles must remain unable to request this family even
+    // if an operator inserts an otherwise well-formed database row.
+    if (profile.abi == ModuleAbi::Cata15595X86 && hasMpq &&
+        plan.profileKey.variant != ClientVariant::Grunt)
     {
         return EncodeStatus::InvalidPlan;
     }
@@ -691,6 +745,16 @@ EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
             if (!index)
                 return EncodeStatus::InvalidPlan;
             candidate.push_back(uint8(profile.checkCodes.lua ^ xorKey));
+            candidate.push_back(index);
+            continue;
+        }
+        if (MpqCheckProfile const* mpq =
+                std::get_if<MpqCheckProfile>(&definition.payload))
+        {
+            uint8 const index = stringIndex(mpq->path);
+            if (!index)
+                return EncodeStatus::InvalidPlan;
+            candidate.push_back(uint8(profile.checkCodes.mpq ^ xorKey));
             candidate.push_back(index);
             continue;
         }

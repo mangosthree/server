@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -375,6 +376,10 @@ struct Harness
                     0x03, 0x0C, 0x00, 0xF7, 0x17, 0xB3, 0x83,
                     0x04, 0x00, 0x00, 0x10, 0x81, 0x56, 0x00,
                     0xC0, 0x6B, 0x56, 0x00, 0x01,
+                    0x03, 0x14, 0x00, 0x50, 0x56, 0xE5, 0xDB,
+                    0x01, 0x00, 0x02, 0x00, 0x10, 0xEA, 0x49,
+                    0x00, 0xF0, 0x9D, 0x49, 0x00, 0x50, 0xB5,
+                    0x49, 0x00, 0x10, 0xB6, 0x49, 0x00,
                     0x03, 0x08, 0x00, 0x99, 0x06, 0x76, 0x7A,
                     0x01, 0x01, 0x00, 0x00, 0x25, 0x5B, 0x00, 0x01});
         return initialization == expected;
@@ -467,6 +472,122 @@ std::size_t CountCommand(Harness& harness, uint8 command,
     }
     return count;
 }
+
+warden::WardenCheckCatalog BuildCatalog(
+    std::vector<warden::WardenCheckRowInput> const& rows)
+{
+    warden::WardenCheckCatalogBuilder builder;
+    warden::WardenCheckDiagnostic diagnostic;
+    for (warden::WardenCheckRowInput const& row : rows)
+    {
+        if (builder.Add(row, diagnostic) !=
+            warden::CheckCatalogValidation::Valid)
+        {
+            return {};
+        }
+    }
+
+    warden::WardenCheckCatalog catalog;
+    if (builder.Build(catalog, diagnostic) !=
+        warden::CheckCatalogValidation::Valid)
+    {
+        return {};
+    }
+    return catalog;
+}
+
+warden::WardenCheckCatalog BuildSyntheticMpqCheckCatalog()
+{
+    std::vector<warden::WardenCheckRowInput> rows =
+        warden::test::CompleteSyntheticRows();
+    for (warden::ClientVariant const variant :
+        {warden::ClientVariant::Stock, warden::ClientVariant::Grunt})
+    {
+        warden::WardenCheckRowInput mpq = warden::test::MakeRow(
+            warden::WardenArchitecture::X64, variant, 2004,
+            warden::WardenCheckType::Mpq, 25,
+            warden::WardenEvidenceClass::Corroboration,
+            warden::PhaseInitial | warden::PhaseRecurring,
+            warden::WardenAddressKind::None);
+        mpq.requestHex =
+            "444246696C6573436C69656E745C4974656D2E646232";
+        mpq.expectedHex =
+            "4706FF83D9B611644A87DE79C244B414612EF4F2";
+        rows.push_back(std::move(mpq));
+    }
+
+    return BuildCatalog(rows);
+}
+
+warden::WardenCheckCatalog BuildProductionShapedX86Catalog()
+{
+    std::vector<warden::WardenCheckRowInput> rows =
+        warden::test::ProfileProbeRows(warden::WardenArchitecture::X86);
+    std::vector<warden::WardenCheckRowInput> x64 =
+        warden::test::ProfileProbeRows(warden::WardenArchitecture::X64);
+    for (warden::ClientVariant const variant :
+        {warden::ClientVariant::Stock, warden::ClientVariant::Grunt})
+    {
+        std::vector<warden::WardenCheckRowInput> classified =
+            warden::test::ClassifiedRows(
+                warden::WardenArchitecture::X64, variant);
+        x64.insert(x64.end(), classified.begin(), classified.end());
+    }
+    rows.insert(rows.end(), x64.begin(), x64.end());
+
+    for (warden::ClientVariant const variant :
+        {warden::ClientVariant::Stock, warden::ClientVariant::LegacyGrunt,
+            warden::ClientVariant::Grunt})
+    {
+        warden::WardenCheckRowInput timing = warden::test::MakeRow(
+            warden::WardenArchitecture::X86, variant, 2001,
+            warden::WardenCheckType::Timing, 10,
+            warden::WardenEvidenceClass::ProtocolHealth,
+            warden::PhaseInitial | warden::PhaseRecurring,
+            warden::WardenAddressKind::None);
+        rows.push_back(std::move(timing));
+
+        warden::WardenCheckRowInput lua = warden::test::MakeRow(
+            warden::WardenArchitecture::X86, variant, 2003,
+            warden::WardenCheckType::Lua, 30,
+            warden::WardenEvidenceClass::Corroboration,
+            warden::PhaseInitial | warden::PhaseRecurring,
+            warden::WardenAddressKind::None);
+        lua.requestHex = "4F4B4159";   // OKAY
+        lua.expectedHex = "4F6B6179";  // Okay
+        rows.push_back(std::move(lua));
+
+        if (variant == warden::ClientVariant::Grunt)
+        {
+            warden::WardenCheckRowInput mpq = warden::test::MakeRow(
+                warden::WardenArchitecture::X86, variant, 2002,
+                warden::WardenCheckType::Mpq, 35,
+                warden::WardenEvidenceClass::Corroboration,
+                warden::PhaseInitial | warden::PhaseRecurring,
+                warden::WardenAddressKind::None);
+            mpq.requestHex =
+                "444246696C6573436C69656E745C4974656D2E646232";
+            mpq.expectedHex =
+                "4706FF83D9B611644A87DE79C244B414612EF4F2";
+            rows.push_back(std::move(mpq));
+        }
+
+        warden::WardenCheckRowInput memory = warden::test::MakeRow(
+            warden::WardenArchitecture::X86, variant, 2004,
+            warden::WardenCheckType::Mem, 40,
+            warden::WardenEvidenceClass::IntegrityInvariant,
+            warden::PhaseInitial | warden::PhaseRecurring |
+                warden::PhaseAggressive,
+            warden::WardenAddressKind::ModuleRelativeRva);
+        memory.moduleHex = "576F772E657865"; // Wow.exe
+        memory.address = 0x0043C257;
+        memory.length = 12;
+        memory.expectedHex = "538B5D08568BC3578D50018A";
+        rows.push_back(std::move(memory));
+    }
+
+    return BuildCatalog(rows);
+}
 }
 
 TEST(WardenManager_requires_observe_until_every_module_is_production_approved)
@@ -556,6 +677,135 @@ TEST(WardenServer_x86_real_module_check_flow_reaches_healthy)
     CHECK(harness.server->GetState() == warden::WardenState::Healthy);
     REQUIRE(harness.evidence.size() == 1u);
     CHECK(warden::IsCompleteCleanOperatorBatch(harness.evidence.front()));
+}
+
+TEST(WardenServer_x86_current_grunt_initializes_filesystem_before_mpq_plan)
+{
+    auto const checks = std::make_shared<warden::WardenCheckCatalog const>(
+        BuildProductionShapedX86Catalog());
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        checks);
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    harness.server->Update(true, 0);
+    REQUIRE(!harness.ReadServer().empty()); // Profile-probe request.
+
+    std::vector<warden::Bytes> probe =
+        warden::test::X86GruntFingerprint();
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *harness.server, std::move(probe));
+    CHECK(harness.server->GetState() ==
+        warden::WardenState::InitialChecksSent);
+
+    warden::Bytes const filesystem = harness.ReadServer();
+    CHECK_HEX(filesystem.data(), filesystem.size(),
+        "0314008f1f12ad01000100508c3a0070513a0088ff3b0000663a00");
+
+    std::optional<warden::CheckPlan> const initial =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(initial.has_value());
+    CHECK(initial->profileKey.variant == warden::ClientVariant::Grunt);
+    std::vector<warden::WardenCheckType> types;
+    std::transform(initial->checks.begin(), initial->checks.end(),
+        std::back_inserter(types),
+        [](warden::WardenCheckDefinition const& check)
+        {
+            return warden::GetWardenCheckType(check);
+        });
+    CHECK(types == std::vector<warden::WardenCheckType>({
+        warden::WardenCheckType::Timing,
+        warden::WardenCheckType::Lua,
+        warden::WardenCheckType::Mpq,
+        warden::WardenCheckType::Mem}));
+    CHECK(std::any_of(initial->checks.begin(), initial->checks.end(),
+        [](warden::WardenCheckDefinition const& check)
+        {
+            return warden::GetWardenCheckType(check) ==
+                warden::WardenCheckType::Mpq;
+        }));
+
+    warden::Bytes const request = harness.ReadServer();
+    REQUIRE(!request.empty());
+    CHECK_EQ(request.front(), uint8(2));
+    std::string const pathText = "DBFilesClient\\Item.db2";
+    warden::Bytes const path(pathText.begin(), pathText.end());
+    CHECK(std::search(request.begin(), request.end(), path.begin(),
+        path.end()) != request.end());
+}
+
+TEST(WardenServer_x86_legacy_grunt_remains_healthy_without_filesystem_or_mpq)
+{
+    Harness harness;
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    harness.server->Update(true, 0);
+    REQUIRE(!harness.ReadServer().empty()); // Profile-probe request.
+
+    std::vector<warden::Bytes> probe =
+        warden::test::X86LegacyGruntFingerprint();
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *harness.server, std::move(probe));
+    CHECK(harness.server->GetState() ==
+        warden::WardenState::InitialChecksSent);
+
+    std::optional<warden::CheckPlan> const initial =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(initial.has_value());
+    CHECK(initial->profileKey.variant == warden::ClientVariant::LegacyGrunt);
+    CHECK(std::none_of(initial->checks.begin(), initial->checks.end(),
+        [](warden::WardenCheckDefinition const& check)
+        {
+            return warden::GetWardenCheckType(check) ==
+                warden::WardenCheckType::Mpq;
+        }));
+
+    // The only new outbound body is the initial check request. A filesystem
+    // command would appear here first and fail this assertion.
+    warden::Bytes const request = harness.ReadServer();
+    REQUIRE(!request.empty());
+    CHECK_EQ(request.front(), uint8(2));
+
+    warden::WardenEvidenceBatch batch = Harness::CleanBatch(*initial);
+    warden::WardenServerTestAccess::CompleteSyntheticEvidenceBatch(
+        *harness.server, std::move(batch));
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+}
+
+TEST(WardenServer_x86_late_filesystem_send_failure_is_operational)
+{
+    Harness harness;
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    harness.server->Update(true, 0);
+    REQUIRE(!harness.ReadServer().empty());
+    harness.sendSucceeds = false;
+
+    std::vector<warden::Bytes> probe =
+        warden::test::X86GruntFingerprint();
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *harness.server, std::move(probe));
+    CHECK(harness.server->GetState() == warden::WardenState::Failed);
+    CHECK(harness.server->GetFailure() == warden::WardenFailure::SendFailure);
+    CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server).has_value());
+    CHECK(harness.evidence.empty());
+}
+
+TEST(WardenServer_x86_mutated_adapter_probe_fails_before_filesystem_init)
+{
+    Harness harness;
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    harness.server->Update(true, 0);
+    REQUIRE(!harness.ReadServer().empty());
+    std::size_t const sentBeforeResult = harness.sent.size();
+
+    std::vector<warden::Bytes> probe =
+        warden::test::X86GruntFingerprint();
+    probe[3][0] ^= 0x01;
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *harness.server, std::move(probe));
+    CHECK(harness.server->GetState() == warden::WardenState::Failed);
+    CHECK(harness.server->GetFailure() ==
+        warden::WardenFailure::ProfileUnclassified);
+    CHECK_EQ(harness.sent.size(), sentBeforeResult);
+    CHECK(harness.evidence.empty());
 }
 
 TEST(WardenServer_x86_malformed_real_check_result_is_operational)
@@ -1144,6 +1394,60 @@ TEST(WardenServer_x64_real_module_check_flow_reaches_healthy)
         warden::WardenState::ProvisionalTimingProbeSent) == states.end());
     CHECK(std::find(states.begin(), states.end(),
         warden::WardenState::ProvisionalValidated) == states.end());
+}
+
+TEST(WardenServer_x64_mpq_checks_compose_end_to_end)
+{
+    auto const checks = std::make_shared<warden::WardenCheckCatalog const>(
+        BuildSyntheticMpqCheckCatalog());
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        checks);
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X64));
+
+    harness.server->Update(true, 0);
+    std::optional<warden::CheckPlan> probe =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(probe.has_value());
+    REQUIRE(!harness.ReadServer().empty());
+
+    warden::Bytes probeResult;
+    REQUIRE(BuildClientCheckResult(*probe,
+        warden::test::X64StockFingerprint(), probeResult));
+    harness.SendClient(std::move(probeResult));
+
+    std::optional<warden::CheckPlan> initial =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(initial.has_value());
+    auto const plannedMpq = std::find_if(initial->checks.begin(),
+        initial->checks.end(), [](warden::WardenCheckDefinition const& check)
+        {
+            return warden::GetWardenCheckType(check) ==
+                warden::WardenCheckType::Mpq;
+        });
+    REQUIRE(plannedMpq != initial->checks.end());
+
+    warden::Bytes const request = harness.ReadServer();
+    std::string const pathText = "DBFilesClient\\Item.db2";
+    warden::Bytes const path(pathText.begin(), pathText.end());
+    CHECK(std::search(request.begin(), request.end(), path.begin(),
+        path.end()) != request.end());
+
+    warden::Bytes result;
+    REQUIRE(BuildClientCheckResult(*initial, {}, result));
+    harness.SendClient(std::move(result));
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+    REQUIRE(harness.evidence.size() == 1u);
+    auto const mpqEvidence = std::find_if(
+        harness.evidence.front().evidence.begin(),
+        harness.evidence.front().evidence.end(),
+        [](warden::WardenEvidence const& item)
+        {
+            return item.checkType == warden::WardenCheckType::Mpq;
+        });
+    REQUIRE(mpqEvidence != harness.evidence.front().evidence.end());
+    CHECK(mpqEvidence->evidenceClass ==
+        warden::WardenEvidenceClass::Corroboration);
+    CHECK(mpqEvidence->outcome == warden::WardenCheckOutcome::Match);
 }
 
 TEST(WardenServer_x64_unstable_timing_is_nonactionable_and_recurs)

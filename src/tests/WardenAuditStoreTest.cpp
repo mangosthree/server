@@ -65,6 +65,9 @@ TEST(WardenAuditContext_accepts_exact_check_and_operational_identities)
     warden::WardenAuditContext context = ValidAudit();
     CHECK(warden::IsValidWardenAuditContext(context));
 
+    context.variant = warden::ClientVariant::LegacyGrunt;
+    CHECK(warden::IsValidWardenAuditContext(context));
+
     context.checkId = 0;
     context.architecture = warden::WardenArchitecture::Unclassified;
     context.locale = {{'u', 'n', 'k', 'n'}};
@@ -84,6 +87,7 @@ TEST(WardenAuditContext_rejects_unproven_check_identity_and_bad_shapes)
 {
     warden::WardenAuditContext context = ValidAudit();
     context.variant = warden::ClientVariant::LegacyGrunt;
+    context.architecture = warden::WardenArchitecture::X64;
     CHECK(!warden::IsValidWardenAuditContext(context));
     context = ValidAudit();
     context.locale = {{'z', 'z', 'Z', 'Z'}};

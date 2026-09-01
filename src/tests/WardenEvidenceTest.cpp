@@ -67,6 +67,14 @@ TEST(WardenEvidence_confirmation_requires_an_actionable_mismatch)
         warden::WardenEvidenceClass::Corroboration,
         warden::WardenCheckOutcome::Mismatch);
     CHECK(!warden::NeedsConfirmation(corroboration));
+
+    auto invalidMpq = Evidence(warden::WardenCheckType::Mpq,
+        warden::WardenEvidenceClass::IntegrityInvariant,
+        warden::WardenCheckOutcome::Mismatch);
+    CHECK(!warden::NeedsConfirmation(invalidMpq));
+    CHECK(warden::ClassifyConfirmedEvidence(
+        warden::WardenEnforcementMode::KickAndBan, invalidMpq) ==
+        warden::WardenConfirmedDisposition::Invalid);
 }
 
 TEST(WardenEvidence_unavailable_and_corroboration_never_become_incidents)

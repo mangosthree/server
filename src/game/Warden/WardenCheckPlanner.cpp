@@ -73,7 +73,9 @@ bool Matches(std::vector<warden::Bytes> const& actual,
 
 bool IsExactProbeProfile(warden::WardenCheckProfile const& profile)
 {
-    if (profile.checks.size() != 3u)
+    std::size_t const expectedCount =
+        profile.key.architecture == warden::WardenArchitecture::X86 ? 4u : 3u;
+    if (profile.checks.size() != expectedCount)
         return false;
 
     warden::Bytes expectedModuleIdentifier;
@@ -109,8 +111,8 @@ bool IsExactProbeProfile(warden::WardenCheckProfile const& profile)
 
     if (profile.key.architecture == warden::WardenArchitecture::X86)
         return addresses == std::vector<uint64>(
-            {0x00007F7A, 0x00088FAE, 0x000895CA}) &&
-            lengths == std::vector<uint32>({5, 1, 7});
+            {0x00007F7A, 0x00088FAE, 0x000895CA, 0x003BFF88}) &&
+            lengths == std::vector<uint32>({5, 1, 7, 24});
     if (profile.key.architecture == warden::WardenArchitecture::X64)
         return addresses == std::vector<uint64>(
             {0x000AB76F, 0x000AABAB, 0x000AA6D3}) &&
@@ -140,8 +142,12 @@ CheckPlanValidation WardenCheckPlanner::Build(CheckPlanPurpose purpose,
         return CheckPlanValidation::InvalidProfilePurpose;
     if (probeProfile && !IsExactProbeProfile(m_profile))
         return CheckPlanValidation::InvalidProfilePurpose;
-    if (!probeProfile && m_profile.key.variant != ClientVariant::Stock &&
-        m_profile.key.variant != ClientVariant::Grunt)
+    bool const selectableClassified =
+        m_profile.key.variant == ClientVariant::Stock ||
+        m_profile.key.variant == ClientVariant::Grunt ||
+        (m_profile.key.architecture == WardenArchitecture::X86 &&
+            m_profile.key.variant == ClientVariant::LegacyGrunt);
+    if (!probeProfile && !selectableClassified)
         return CheckPlanValidation::InvalidProfilePurpose;
 
     CheckPlan staged;
@@ -212,12 +218,23 @@ ClientVariant ClassifyProfileProbe(WardenArchitecture architecture,
 
     if (architecture == WardenArchitecture::X86)
     {
+        Bytes const unpatchedAdapter(24, 0xCC);
+        Bytes const adapter = {
+            0x55, 0x8B, 0xEC, 0xFF, 0x75, 0x14, 0xFF, 0x75,
+            0x10, 0xFF, 0x75, 0x0C, 0xFF, 0x75, 0x08, 0xE8,
+            0xB4, 0x65, 0xFE, 0xFF, 0x5D, 0xC2, 0x14, 0x00};
         consider(ClientVariant::Stock,
             {{0xE8, 0xB1, 0xED, 0xFF, 0xFF}, {0x74},
-                {0x8B, 0x55, 0x0C, 0x83, 0xFA, 0x02, 0x75}});
+                {0x8B, 0x55, 0x0C, 0x83, 0xFA, 0x02, 0x75},
+                unpatchedAdapter});
+        consider(ClientVariant::LegacyGrunt,
+            {{0xB8, 0x01, 0x00, 0x00, 0x00}, {0xEB},
+                {0xBA, 0x00, 0x00, 0x00, 0x00, 0x90, 0xEB},
+                unpatchedAdapter});
         consider(ClientVariant::Grunt,
             {{0xB8, 0x01, 0x00, 0x00, 0x00}, {0xEB},
-                {0xBA, 0x00, 0x00, 0x00, 0x00, 0x90, 0xEB}});
+                {0xBA, 0x00, 0x00, 0x00, 0x00, 0x90, 0xEB},
+                adapter});
     }
     else if (architecture == WardenArchitecture::X64)
     {

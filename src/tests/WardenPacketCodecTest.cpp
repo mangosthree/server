@@ -69,32 +69,34 @@ warden::CheckPlan FourFamilyX86Plan()
     plan.requestId = 7;
     plan.purpose = warden::CheckPlanPurpose::Initial;
     plan.profileKey = {15595, warden::WardenArchitecture::X86,
-        {{'e', 'n', 'U', 'S'}}, warden::ClientVariant::Stock};
+        {{'e', 'n', 'U', 'S'}}, warden::ClientVariant::Grunt};
 
     warden::WardenCheckDefinition timing;
     timing.sortOrder = 10;
     timing.evidenceClass = warden::WardenEvidenceClass::ProtocolHealth;
     timing.phaseMask = warden::PhaseInitial;
     timing.addressKind = warden::WardenAddressKind::None;
-    timing.payload = warden::TimingCheckProfile{1};
+    timing.payload = warden::TimingCheckProfile{2001};
     plan.checks.push_back(timing);
 
     warden::WardenCheckDefinition lua;
-    lua.sortOrder = 20;
+    lua.sortOrder = 30;
     lua.evidenceClass = warden::WardenEvidenceClass::Corroboration;
     lua.phaseMask = warden::PhaseInitial;
     lua.addressKind = warden::WardenAddressKind::None;
-    lua.payload = warden::LuaCheckProfile{2, "warden_test", "ok"};
+    lua.payload = warden::LuaCheckProfile{2003, "OKAY", "Okay"};
     plan.checks.push_back(lua);
 
     warden::MpqCheckProfile mpqProfile;
-    mpqProfile.checkId = 3;
+    mpqProfile.checkId = 2002;
     mpqProfile.path = "DBFilesClient\\Item.db2";
-    for (std::size_t index = 0; index < mpqProfile.expectedSha1.size(); ++index)
-        mpqProfile.expectedSha1[index] = uint8(index);
+    mpqProfile.expectedSha1 = {{
+        0x47, 0x06, 0xFF, 0x83, 0xD9, 0xB6, 0x11, 0x64,
+        0x4A, 0x87, 0xDE, 0x79, 0xC2, 0x44, 0xB4, 0x14,
+        0x61, 0x2E, 0xF4, 0xF2}};
     warden::WardenCheckDefinition mpq;
-    mpq.sortOrder = 30;
-    mpq.evidenceClass = warden::WardenEvidenceClass::IntegrityInvariant;
+    mpq.sortOrder = 35;
+    mpq.evidenceClass = warden::WardenEvidenceClass::Corroboration;
     mpq.phaseMask = warden::PhaseInitial;
     mpq.addressKind = warden::WardenAddressKind::None;
     mpq.payload = mpqProfile;
@@ -105,14 +107,15 @@ warden::CheckPlan FourFamilyX86Plan()
     memory.evidenceClass = warden::WardenEvidenceClass::Corroboration;
     memory.phaseMask = warden::PhaseInitial;
     memory.addressKind = warden::WardenAddressKind::ModuleRelativeRva;
-    memory.payload = warden::MemCheckProfile{4,
-        {'W', 'o', 'w', '.', 'e', 'x', 'e'}, 0x00007F7A, 5,
-        {0xE8, 0xB1, 0xED, 0xFF, 0xFF}};
+    memory.payload = warden::MemCheckProfile{2004,
+        {'W', 'o', 'w', '.', 'e', 'x', 'e'}, 0x0043C257, 12,
+        {0x53, 0x8B, 0x5D, 0x08, 0x56, 0x8B, 0xC3, 0x57,
+            0x8D, 0x50, 0x01, 0x8A}};
     plan.checks.push_back(memory);
     return plan;
 }
 
-warden::CheckPlan ThreeFamilyX64Plan()
+warden::CheckPlan FourFamilyX64Plan()
 {
     warden::CheckPlan plan;
     plan.requestId = 8;
@@ -125,7 +128,7 @@ warden::CheckPlan ThreeFamilyX64Plan()
     timing.evidenceClass = warden::WardenEvidenceClass::ProtocolHealth;
     timing.phaseMask = warden::PhaseInitial;
     timing.addressKind = warden::WardenAddressKind::None;
-    timing.payload = warden::TimingCheckProfile{1};
+    timing.payload = warden::TimingCheckProfile{2001};
     plan.checks.push_back(timing);
 
     warden::WardenCheckDefinition lua;
@@ -133,15 +136,30 @@ warden::CheckPlan ThreeFamilyX64Plan()
     lua.evidenceClass = warden::WardenEvidenceClass::Corroboration;
     lua.phaseMask = warden::PhaseInitial;
     lua.addressKind = warden::WardenAddressKind::None;
-    lua.payload = warden::LuaCheckProfile{2, "OKAY", "Okay"};
+    lua.payload = warden::LuaCheckProfile{2003, "OKAY", "Okay"};
     plan.checks.push_back(lua);
 
+    warden::MpqCheckProfile mpqProfile;
+    mpqProfile.checkId = 2002;
+    mpqProfile.path = "DBFilesClient\\Item.db2";
+    mpqProfile.expectedSha1 = {{
+        0x47, 0x06, 0xFF, 0x83, 0xD9, 0xB6, 0x11, 0x64,
+        0x4A, 0x87, 0xDE, 0x79, 0xC2, 0x44, 0xB4, 0x14,
+        0x61, 0x2E, 0xF4, 0xF2}};
+    warden::WardenCheckDefinition mpq;
+    mpq.sortOrder = 35;
+    mpq.evidenceClass = warden::WardenEvidenceClass::Corroboration;
+    mpq.phaseMask = warden::PhaseInitial;
+    mpq.addressKind = warden::WardenAddressKind::None;
+    mpq.payload = mpqProfile;
+    plan.checks.push_back(mpq);
+
     warden::WardenCheckDefinition memory;
-    memory.sortOrder = 30;
+    memory.sortOrder = 40;
     memory.evidenceClass = warden::WardenEvidenceClass::IntegrityInvariant;
     memory.phaseMask = warden::PhaseInitial;
     memory.addressKind = warden::WardenAddressKind::ModuleRelativeRva;
-    memory.payload = warden::MemCheckProfile{3,
+    memory.payload = warden::MemCheckProfile{2004,
         {'W', 'o', 'w', '-', '6', '4', '.', 'e', 'x', 'e'},
         0x00566C13, 16,
         {0x48, 0x83, 0xC9, 0xFF, 0x33, 0xC0, 0x48, 0x8B,
@@ -183,31 +201,49 @@ std::optional<warden::WardenCheckXorKey> X64CheckXorKey()
 warden::ModuleProfile X64FullProfile()
 {
     warden::ModuleProfile profile;
+    profile.key = {15595, warden::WardenArchitecture::X64};
     profile.abi = warden::ModuleAbi::Cata15595X64;
+    profile.operatingMode = warden::ModuleOperatingMode::Full;
     profile.checkCodes = {warden::Cata15595X64TimingCode,
-        warden::Cata15595X64LuaCode, 0,
+        warden::Cata15595X64LuaCode, warden::Cata15595X64MpqCode,
         warden::Cata15595X64MemoryCode};
+    return profile;
+}
+
+warden::ModuleProfile X86FullProfile()
+{
+    warden::ModuleProfile profile;
+    profile.key = {15595, warden::WardenArchitecture::X86};
+    profile.abi = warden::ModuleAbi::Cata15595X86;
+    profile.operatingMode = warden::ModuleOperatingMode::Full;
+    profile.checkCodes = {warden::Cata15595X86TimingCode,
+        warden::Cata15595X86LuaCode, warden::Cata15595X86MpqCode,
+        warden::Cata15595X86MemoryCode};
     return profile;
 }
 
 warden::Bytes ValidFourFamilyResult()
 {
     return {
-        0x02, 0x24, 0x00, 0xD7, 0x64, 0xB4, 0xF7,
-        0x01, 0x78, 0x56, 0x34, 0x12,
-        0x00, 0x02, 0x6F, 0x6B,
-        0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-        0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
-        0x0F, 0x10, 0x11, 0x12, 0x13,
-        0x00, 0xE8, 0xB1, 0xED, 0xFF, 0xFF};
-}
-
-warden::Bytes ValidThreeFamilyX64Result()
-{
-    return {
-        0x02, 0x1C, 0x00, 0x00, 0xE6, 0x16, 0x3B,
+        0x02, 0x2D, 0x00, 0xB9, 0x14, 0x48, 0xF1,
         0x01, 0x78, 0x56, 0x34, 0x12,
         0x00, 0x04, 0x4F, 0x6B, 0x61, 0x79,
+        0x00, 0x47, 0x06, 0xFF, 0x83, 0xD9, 0xB6, 0x11,
+        0x64, 0x4A, 0x87, 0xDE, 0x79, 0xC2, 0x44, 0xB4,
+        0x14, 0x61, 0x2E, 0xF4, 0xF2,
+        0x00, 0x53, 0x8B, 0x5D, 0x08, 0x56, 0x8B, 0xC3,
+        0x57, 0x8D, 0x50, 0x01, 0x8A};
+}
+
+warden::Bytes ValidFourFamilyX64Result()
+{
+    return {
+        0x02, 0x31, 0x00, 0x74, 0xA9, 0x5F, 0x45,
+        0x01, 0x78, 0x56, 0x34, 0x12,
+        0x00, 0x04, 0x4F, 0x6B, 0x61, 0x79,
+        0x00, 0x47, 0x06, 0xFF, 0x83, 0xD9, 0xB6, 0x11,
+        0x64, 0x4A, 0x87, 0xDE, 0x79, 0xC2, 0x44, 0xB4,
+        0x14, 0x61, 0x2E, 0xF4, 0xF2,
         0x00, 0x48, 0x83, 0xC9, 0xFF, 0x33, 0xC0, 0x48,
         0x8B, 0xFD, 0xBA, 0xF0, 0xD8, 0xFF, 0xFF, 0xF2, 0xAE};
 }
@@ -366,10 +402,11 @@ TEST(WardenPacketCodec_encodes_exact_build_15595_x64_initialization)
 {
     warden::Bytes plaintext = {0xA5};
     CHECK_EQ(int(warden::EncodeModuleInitialization(
-                 warden::ModuleAbi::Cata15595X64, plaintext)),
+                 X64FullProfile(), plaintext)),
         int(warden::EncodeStatus::Ok));
     CHECK_HEX(plaintext.data(), plaintext.size(),
         "030c00f717b38304000010815600c06b560001"
+        "0314005056e5db0100020010ea4900f09d490050b5490010b64900"
         "0308009906767a01010000255b0001");
 }
 
@@ -377,11 +414,83 @@ TEST(WardenPacketCodec_encodes_exact_build_15595_x86_initialization)
 {
     warden::Bytes plaintext = {0xA5};
     CHECK_EQ(int(warden::EncodeModuleInitialization(
-                 warden::ModuleAbi::Cata15595X86, plaintext)),
+                 X86FullProfile(), plaintext)),
         int(warden::EncodeStatus::Ok));
     CHECK_HEX(plaintext.data(), plaintext.size(),
         "030c00e9ab2bd104000010d3430030c2430001"
         "0308004ca09e6c0101004097470001");
+}
+
+TEST(WardenPacketCodec_encodes_deferred_filesystem_only_for_current_x86_grunt)
+{
+    warden::Bytes plaintext = {0xA5};
+    CHECK_EQ(int(warden::EncodeDeferredFilesystemInitialization(
+                 X86FullProfile(), warden::ClientVariant::Grunt, plaintext)),
+        int(warden::EncodeStatus::Ok));
+    CHECK_HEX(plaintext.data(), plaintext.size(),
+        "0314008f1f12ad01000100508c3a0070513a0088ff3b0000663a00");
+
+    for (warden::ClientVariant const variant : {
+             warden::ClientVariant::Unclassified,
+             warden::ClientVariant::Stock,
+             warden::ClientVariant::LegacyGrunt})
+    {
+        plaintext = {0xA5};
+        CHECK_EQ(int(warden::EncodeDeferredFilesystemInitialization(
+                     X86FullProfile(), variant, plaintext)),
+            int(warden::EncodeStatus::InvalidProfile));
+        CHECK(plaintext.empty());
+    }
+
+    warden::ModuleProfile invalid = X64FullProfile();
+    plaintext = {0xA5};
+    CHECK_EQ(int(warden::EncodeDeferredFilesystemInitialization(
+                 invalid, warden::ClientVariant::Grunt, plaintext)),
+        int(warden::EncodeStatus::InvalidProfile));
+    CHECK(plaintext.empty());
+
+    invalid = X86FullProfile();
+    invalid.checkCodes.mpq ^= 0x01;
+    plaintext = {0xA5};
+    CHECK_EQ(int(warden::EncodeDeferredFilesystemInitialization(
+                 invalid, warden::ClientVariant::Grunt, plaintext)),
+        int(warden::EncodeStatus::InvalidProfile));
+    CHECK(plaintext.empty());
+
+    invalid = X86FullProfile();
+    invalid.operatingMode =
+        warden::ModuleOperatingMode::CompatibilityProbeOnly;
+    plaintext = {0xA5};
+    CHECK_EQ(int(warden::EncodeDeferredFilesystemInitialization(
+                 invalid, warden::ClientVariant::Grunt, plaintext)),
+        int(warden::EncodeStatus::InvalidProfile));
+    CHECK(plaintext.empty());
+}
+
+TEST(WardenPacketCodec_x64_probe_only_initialization_withholds_filesystem_callbacks)
+{
+    warden::ModuleProfile profile = X64FullProfile();
+    profile.operatingMode = warden::ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.checkCodes = {warden::CataX64CompatibilityTimingCode, 0, 0, 0};
+
+    warden::Bytes plaintext = {0xA5};
+    CHECK_EQ(int(warden::EncodeModuleInitialization(profile, plaintext)),
+        int(warden::EncodeStatus::Ok));
+    CHECK_HEX(plaintext.data(), plaintext.size(),
+        "030c00f717b38304000010815600c06b560001"
+        "0308009906767a01010000255b0001");
+}
+
+TEST(WardenPacketCodec_rejects_probe_only_initialization_for_x86)
+{
+    warden::ModuleProfile profile = X86FullProfile();
+    profile.operatingMode = warden::ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.checkCodes = {warden::Cata15595X86TimingCode, 0, 0, 0};
+
+    warden::Bytes plaintext = {0xA5};
+    CHECK_EQ(int(warden::EncodeModuleInitialization(profile, plaintext)),
+        int(warden::EncodeStatus::InvalidProfile));
+    CHECK(plaintext.empty());
 }
 
 TEST(WardenPacketCodec_encodes_pinned_x64_timing_request_from_typed_key)
@@ -522,26 +631,40 @@ TEST(WardenPacketCodec_accepts_only_pinned_x64_module_hash_response)
         int(warden::ModuleDecodeStatus::DigestMismatch));
 }
 
-TEST(WardenPacketCodec_x86_rejects_mpq_without_a_compatible_client_callback)
+TEST(WardenPacketCodec_x86_encodes_mpq_only_for_current_adapter_grunt)
 {
-    warden::CheckPlan const plan = FourFamilyX86Plan();
+    warden::CheckPlan plan = FourFamilyX86Plan();
     warden::WardenCheckPlanBudget budget;
     CHECK(warden::InspectCheckPlan(warden::ModuleAbi::Cata15595X86,
         plan, budget) == warden::CheckPlanValidation::Valid);
     CHECK_EQ(budget.stringCount, std::size_t(3));
-    CHECK_EQ(budget.stringTableBytes, std::size_t(44));
-    CHECK_EQ(budget.requestBody, std::size_t(57));
-    CHECK_EQ(budget.maximumResultBody, std::size_t(289));
+    CHECK_EQ(budget.stringTableBytes, std::size_t(37));
+    CHECK_EQ(budget.requestBody, std::size_t(51));
+    CHECK_EQ(budget.maximumResultBody, std::size_t(296));
 
     std::optional<warden::WardenCheckXorKey> const key = X86CheckXorKey();
     REQUIRE(key.has_value());
-    warden::ModuleProfile profile;
-    profile.abi = warden::ModuleAbi::Cata15595X86;
-    profile.checkCodes = {warden::Cata15595X86TimingCode,
-        warden::Cata15595X86LuaCode, 0,
-        warden::Cata15595X86MemoryCode};
-    warden::Bytes encoded = {0xA5};
-    CHECK(warden::EncodeCheckRequest(profile, *key, plan, encoded) ==
+    warden::Bytes encoded;
+    CHECK(warden::EncodeCheckRequest(X86FullProfile(), *key, plan, encoded) ==
+        warden::EncodeStatus::Ok);
+    CHECK_HEX(encoded.data(), encoded.size(),
+        "02044f4b415916444246696c6573436c69656e745c4974656d2e646232"
+        "07576f772e657865005acb010802be030657c2430c53");
+
+    for (warden::ClientVariant const variant :
+        {warden::ClientVariant::Stock, warden::ClientVariant::LegacyGrunt})
+    {
+        plan.profileKey.variant = variant;
+        encoded = {0xA5};
+        CHECK(warden::EncodeCheckRequest(
+            X86FullProfile(), *key, plan, encoded) ==
+            warden::EncodeStatus::InvalidPlan);
+        CHECK_HEX(encoded.data(), encoded.size(), "a5");
+    }
+
+    plan.profileKey.variant = warden::ClientVariant::Unclassified;
+    encoded = {0xA5};
+    CHECK(warden::EncodeCheckRequest(X86FullProfile(), *key, plan, encoded) ==
         warden::EncodeStatus::InvalidPlan);
     CHECK_HEX(encoded.data(), encoded.size(), "a5");
 }
@@ -550,23 +673,19 @@ TEST(WardenPacketCodec_x86_encodes_supported_timing_lua_and_memory_plan)
 {
     warden::CheckPlan plan = FourFamilyX86Plan();
     plan.checks.erase(plan.checks.begin() + 2);
+    plan.profileKey.variant = warden::ClientVariant::Stock;
 
     std::optional<warden::WardenCheckXorKey> const key = X86CheckXorKey();
     REQUIRE(key.has_value());
-    warden::ModuleProfile profile;
-    profile.abi = warden::ModuleAbi::Cata15595X86;
-    profile.checkCodes = {warden::Cata15595X86TimingCode,
-        warden::Cata15595X86LuaCode, 0,
-        warden::Cata15595X86MemoryCode};
     warden::Bytes encoded;
-    CHECK(warden::EncodeCheckRequest(profile, *key, plan, encoded) ==
+    CHECK(warden::EncodeCheckRequest(X86FullProfile(), *key, plan, encoded) ==
         warden::EncodeStatus::Ok);
     CHECK_HEX(encoded.data(), encoded.size(),
-        "020b77617264656e5f7465737407576f772e65786500"
-        "5acb01be02027a7f0553");
+        "02044f4b415907576f772e65786500"
+        "5acb01be020657c2430c53");
 }
 
-TEST(WardenPacketCodec_x64_encodes_pinned_timing_lua_and_memory_plan)
+TEST(WardenPacketCodec_x64_encodes_pinned_four_family_production_plan)
 {
     std::optional<warden::WardenCheckXorKey> const key =
         X64CheckXorKey();
@@ -575,22 +694,22 @@ TEST(WardenPacketCodec_x64_encodes_pinned_timing_lua_and_memory_plan)
 
     warden::Bytes encoded;
     CHECK(warden::EncodeCheckRequest(X64FullProfile(), *key,
-        ThreeFamilyX64Plan(), encoded) == warden::EncodeStatus::Ok);
+        FourFamilyX64Plan(), encoded) == warden::EncodeStatus::Ok);
     CHECK_HEX(encoded.data(), encoded.size(),
-        "02044f4b41590a576f772d36342e65786500"
-        "bf0401630206136c561055");
+        "02044f4b415916444246696c6573436c69656e745c4974656d2e646232"
+        "0a576f772d36342e65786500bf0401c502630306136c561055");
 }
 
-TEST(WardenPacketCodec_x64_decodes_pinned_timing_lua_and_memory_result)
+TEST(WardenPacketCodec_x64_decodes_pinned_four_family_production_result)
 {
-    warden::Bytes const plaintext = ValidThreeFamilyX64Result();
-    REQUIRE(plaintext.size() == std::size_t(35));
+    warden::Bytes const plaintext = ValidFourFamilyX64Result();
+    REQUIRE(plaintext.size() == std::size_t(56));
 
     warden::CheckBatchResult decoded;
     CHECK(warden::DecodeCheckResult(warden::ModuleAbi::Cata15595X64,
-        warden::ByteView(plaintext), ThreeFamilyX64Plan(), decoded) ==
+        warden::ByteView(plaintext), FourFamilyX64Plan(), decoded) ==
         warden::DecodeStatus::Ok);
-    REQUIRE(decoded.checks.size() == 3u);
+    REQUIRE(decoded.checks.size() == 4u);
 
     warden::TimingResult const* timing =
         std::get_if<warden::TimingResult>(&decoded.checks[0]);
@@ -604,8 +723,15 @@ TEST(WardenPacketCodec_x64_decodes_pinned_timing_lua_and_memory_result)
     CHECK(lua->status == warden::LuaResultStatus::Success);
     CHECK(lua->text == "Okay");
 
+    warden::MpqResult const* mpq =
+        std::get_if<warden::MpqResult>(&decoded.checks[2]);
+    REQUIRE(mpq != nullptr);
+    CHECK(mpq->status == warden::MpqResultStatus::Success);
+    CHECK_HEX(mpq->digest.data(), mpq->digest.size(),
+        "4706ff83d9b611644a87de79c244b414612ef4f2");
+
     warden::MemResult const* memory =
-        std::get_if<warden::MemResult>(&decoded.checks[2]);
+        std::get_if<warden::MemResult>(&decoded.checks[3]);
     REQUIRE(memory != nullptr);
     CHECK(memory->status == warden::MemResultStatus::Success);
     CHECK(memory->actualBytes == warden::Bytes({
@@ -615,15 +741,15 @@ TEST(WardenPacketCodec_x64_decodes_pinned_timing_lua_and_memory_result)
 
 TEST(WardenPacketCodec_x64_treats_timing_status_zero_as_unstable_health)
 {
-    warden::Bytes plaintext = ValidThreeFamilyX64Result();
+    warden::Bytes plaintext = ValidFourFamilyX64Result();
     plaintext[warden::CheckResultEnvelopeSize] = 0;
     REQUIRE(RewriteCheckResultEnvelope(plaintext));
 
     warden::CheckBatchResult decoded;
     CHECK(warden::DecodeCheckResult(warden::ModuleAbi::Cata15595X64,
-        warden::ByteView(plaintext), ThreeFamilyX64Plan(), decoded) ==
+        warden::ByteView(plaintext), FourFamilyX64Plan(), decoded) ==
         warden::DecodeStatus::Ok);
-    REQUIRE(decoded.checks.size() == 3u);
+    REQUIRE(decoded.checks.size() == 4u);
     warden::TimingResult const* timing =
         std::get_if<warden::TimingResult>(&decoded.checks[0]);
     REQUIRE(timing != nullptr);
@@ -633,8 +759,8 @@ TEST(WardenPacketCodec_x64_treats_timing_status_zero_as_unstable_health)
 
 TEST(WardenPacketCodec_x64_preserves_packed_canonical_absolute_addresses)
 {
-    warden::CheckPlan plan = ThreeFamilyX64Plan();
-    plan.checks.erase(plan.checks.begin(), plan.checks.begin() + 2);
+    warden::CheckPlan plan = FourFamilyX64Plan();
+    plan.checks.erase(plan.checks.begin(), plan.checks.begin() + 3);
     warden::WardenCheckDefinition& definition = plan.checks.front();
     definition.addressKind = warden::WardenAddressKind::AbsoluteVa;
     warden::MemCheckProfile& memory =
@@ -677,8 +803,8 @@ TEST(WardenPacketCodec_x64_preserves_packed_canonical_absolute_addresses)
 
 TEST(WardenPacketCodec_keeps_rvas_and_x86_absolute_addresses_32_bit)
 {
-    warden::CheckPlan x64 = ThreeFamilyX64Plan();
-    x64.checks.erase(x64.checks.begin(), x64.checks.begin() + 2);
+    warden::CheckPlan x64 = FourFamilyX64Plan();
+    x64.checks.erase(x64.checks.begin(), x64.checks.begin() + 3);
     std::get<warden::MemCheckProfile>(x64.checks.front().payload).
         addressOrRva = uint64(std::numeric_limits<uint32>::max()) + 1;
     warden::WardenCheckPlanBudget budget;
@@ -697,41 +823,25 @@ TEST(WardenPacketCodec_keeps_rvas_and_x86_absolute_addresses_32_bit)
         x86, budget) == warden::CheckPlanValidation::InvalidDefinition);
 }
 
-TEST(WardenPacketCodec_x64_rejects_mpq_and_unpublished_check_code_maps)
+TEST(WardenPacketCodec_x64_rejects_unpublished_check_code_maps)
 {
     std::optional<warden::WardenCheckXorKey> const key =
         X64CheckXorKey();
     REQUIRE(key.has_value());
 
-    warden::CheckPlan mpqPlan = ThreeFamilyX64Plan();
-    warden::MpqCheckProfile mpqProfile;
-    mpqProfile.checkId = 4;
-    mpqProfile.path = "DBFilesClient\\Item.db2";
-    warden::WardenCheckDefinition mpq;
-    mpq.sortOrder = 25;
-    mpq.evidenceClass = warden::WardenEvidenceClass::IntegrityInvariant;
-    mpq.phaseMask = warden::PhaseInitial;
-    mpq.addressKind = warden::WardenAddressKind::None;
-    mpq.payload = mpqProfile;
-    mpqPlan.checks.insert(mpqPlan.checks.begin() + 2, mpq);
-
-    warden::Bytes encoded = {0xA5};
-    CHECK(warden::EncodeCheckRequest(X64FullProfile(), *key, mpqPlan,
-        encoded) == warden::EncodeStatus::InvalidPlan);
-    CHECK_HEX(encoded.data(), encoded.size(), "a5");
-
+    warden::Bytes encoded;
     std::array<warden::ModuleCheckCodes, 4> const invalidCodes = {{
-        {0xEB, 0x51, 0x00, 0x36},
-        {0xEA, 0x50, 0x00, 0x36},
-        {0xEA, 0x51, 0x01, 0x36},
-        {0xEA, 0x51, 0x00, 0x37}}};
+        {0xEB, 0x51, 0x90, 0x36},
+        {0xEA, 0x50, 0x90, 0x36},
+        {0xEA, 0x51, 0x91, 0x36},
+        {0xEA, 0x51, 0x90, 0x37}}};
     for (warden::ModuleCheckCodes const& codes : invalidCodes)
     {
         warden::ModuleProfile profile = X64FullProfile();
         profile.checkCodes = codes;
         encoded = {0xA5};
         CHECK(warden::EncodeCheckRequest(profile, *key,
-            ThreeFamilyX64Plan(), encoded) ==
+            FourFamilyX64Plan(), encoded) ==
             warden::EncodeStatus::InvalidProfile);
         CHECK_HEX(encoded.data(), encoded.size(), "a5");
     }
@@ -756,21 +866,22 @@ TEST(WardenPacketCodec_x86_decodes_exact_four_family_result_transactionally)
         std::get_if<warden::LuaResult>(&decoded.checks[1]);
     REQUIRE(lua != nullptr);
     CHECK(lua->status == warden::LuaResultStatus::Success);
-    CHECK(lua->text == "ok");
+    CHECK(lua->text == "Okay");
 
     warden::MpqResult const* mpq =
         std::get_if<warden::MpqResult>(&decoded.checks[2]);
     REQUIRE(mpq != nullptr);
     CHECK(mpq->status == warden::MpqResultStatus::Success);
-    for (std::size_t index = 0; index < mpq->digest.size(); ++index)
-        CHECK_EQ(mpq->digest[index], uint8(index));
+    CHECK_HEX(mpq->digest.data(), mpq->digest.size(),
+        "4706ff83d9b611644a87de79c244b414612ef4f2");
 
     warden::MemResult const* memory =
         std::get_if<warden::MemResult>(&decoded.checks[3]);
     REQUIRE(memory != nullptr);
     CHECK(memory->status == warden::MemResultStatus::Success);
     CHECK(memory->actualBytes ==
-        warden::Bytes({0xE8, 0xB1, 0xED, 0xFF, 0xFF}));
+        warden::Bytes({0x53, 0x8B, 0x5D, 0x08, 0x56, 0x8B,
+            0xC3, 0x57, 0x8D, 0x50, 0x01, 0x8A}));
 }
 
 TEST(WardenPacketCodec_x86_rejects_mutated_result_envelopes_transactionally)
@@ -799,9 +910,9 @@ TEST(WardenPacketCodec_x86_rejects_mutated_result_envelopes_transactionally)
 
 TEST(WardenPacketCodec_x86_rejects_each_malformed_result_member)
 {
-    // Body offsets: timing 0..4, Lua 5..8, MPQ 9..29, memory 30..35.
+    // Body offsets: timing 0..4, Lua 5..10, MPQ 11..31, memory 32..44.
     for (std::size_t bodyOffset : {std::size_t(0), std::size_t(5),
-             std::size_t(9), std::size_t(30)})
+             std::size_t(11), std::size_t(32)})
     {
         warden::Bytes mutated = ValidFourFamilyResult();
         mutated[warden::CheckResultEnvelopeSize + bodyOffset] = 2;
@@ -825,4 +936,52 @@ TEST(WardenPacketCodec_x86_rejects_each_malformed_result_member)
     trailing.push_back(0xA5);
     REQUIRE(RewriteCheckResultEnvelope(trailing));
     CheckRejectedCheckResult(trailing, warden::DecodeStatus::WrongSize);
+}
+
+TEST(WardenPacketCodec_mpq_paths_fit_the_exact_client_stack_buffers)
+{
+    warden::WardenCheckPlanBudget budget;
+    for (warden::ModuleAbi const abi : {warden::ModuleAbi::Cata15595X86,
+             warden::ModuleAbi::Cata15595X64})
+    {
+        warden::CheckPlan plan = abi == warden::ModuleAbi::Cata15595X86 ?
+            FourFamilyX86Plan() : FourFamilyX64Plan();
+        warden::MpqCheckProfile& mpq =
+            std::get<warden::MpqCheckProfile>(plan.checks[2].payload);
+        mpq.path.assign(std::numeric_limits<uint8>::max(), 'A');
+        CHECK(warden::InspectCheckPlan(abi, plan, budget) ==
+            warden::CheckPlanValidation::Valid);
+
+        mpq.path.push_back('A');
+        CHECK(warden::InspectCheckPlan(abi, plan, budget) ==
+            warden::CheckPlanValidation::InvalidDefinition);
+    }
+}
+
+TEST(WardenPacketCodec_decodes_mpq_unavailable_without_a_digest)
+{
+    for (warden::ModuleAbi const abi : {warden::ModuleAbi::Cata15595X86,
+             warden::ModuleAbi::Cata15595X64})
+    {
+        warden::Bytes plaintext = abi == warden::ModuleAbi::Cata15595X86 ?
+            ValidFourFamilyResult() : ValidFourFamilyX64Result();
+        std::size_t const digestOffset = warden::CheckResultEnvelopeSize + 12;
+        plaintext[warden::CheckResultEnvelopeSize + 11] =
+            uint8(warden::MpqResultStatus::Unavailable);
+        plaintext.erase(plaintext.begin() + digestOffset,
+            plaintext.begin() + digestOffset + warden::Digest20{}.size());
+        REQUIRE(RewriteCheckResultEnvelope(plaintext));
+
+        warden::CheckPlan const plan =
+            abi == warden::ModuleAbi::Cata15595X86 ?
+                FourFamilyX86Plan() : FourFamilyX64Plan();
+        warden::CheckBatchResult decoded;
+        CHECK(warden::DecodeCheckResult(abi, warden::ByteView(plaintext),
+            plan, decoded) == warden::DecodeStatus::Ok);
+        REQUIRE(decoded.checks.size() == 4u);
+        warden::MpqResult const* mpq =
+            std::get_if<warden::MpqResult>(&decoded.checks[2]);
+        REQUIRE(mpq != nullptr);
+        CHECK(mpq->status == warden::MpqResultStatus::Unavailable);
+    }
 }

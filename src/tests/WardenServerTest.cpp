@@ -788,6 +788,18 @@ TEST(WardenServer_x86_late_filesystem_send_failure_is_operational)
     CHECK(harness.evidence.empty());
 }
 
+TEST(WardenServer_x86_deferred_filesystem_encode_failure_is_unsupported)
+{
+    Harness harness;
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    std::size_t const sentBefore = harness.sent.size();
+
+    CHECK(warden::WardenServerTestAccess::
+        TryDeferredFilesystemInitialization(*harness.server) ==
+        warden::WardenFailure::UnsupportedProfile);
+    CHECK_EQ(harness.sent.size(), sentBefore);
+}
+
 TEST(WardenServer_x86_mutated_adapter_probe_fails_before_filesystem_init)
 {
     Harness harness;

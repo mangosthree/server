@@ -146,7 +146,8 @@ private:
     bool SendModuleTransfer();
     bool SendModuleHashRequest();
     bool SendModuleInitialization();
-    bool SendDeferredFilesystemInitialization();
+    /** Distinguishes an invalid initializer profile from transport failure. */
+    WardenFailure SendDeferredFilesystemInitialization();
     bool SendCompatibilityTimingProbe();
     bool HasCompleteSelectedProfiles() const;
     bool BeginProfileProbe();
@@ -228,6 +229,8 @@ public:
         WardenServer& server, WardenEvidenceBatch&& batch);
     static void ForceNextArchitectureMatches(
         WardenServer& server, bool x86, bool x64);
+    static WardenFailure TryDeferredFilesystemInitialization(
+        WardenServer& server);
     static bool PreviewCommittedClientPlaintext(WardenServer const& server,
         ByteView encryptedBody, Bytes& plain);
     static void SetScheduleSecondsSelector(WardenServer& server,

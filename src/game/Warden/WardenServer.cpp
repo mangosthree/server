@@ -541,14 +541,18 @@ bool WardenServer::SendModuleInitialization()
         SendPlain(std::move(initialization));
 }
 
-bool WardenServer::SendDeferredFilesystemInitialization()
+WardenFailure WardenServer::SendDeferredFilesystemInitialization()
 {
     if (!m_module)
-        return false;
+        return WardenFailure::UnsupportedProfile;
     Bytes initialization;
-    return EncodeDeferredFilesystemInitialization(
-               *m_module, m_variant, initialization) == EncodeStatus::Ok &&
-        SendPlain(std::move(initialization));
+    if (EncodeDeferredFilesystemInitialization(
+            *m_module, m_variant, initialization) != EncodeStatus::Ok)
+    {
+        return WardenFailure::UnsupportedProfile;
+    }
+    return SendPlain(std::move(initialization)) ? WardenFailure::None :
+        WardenFailure::SendFailure;
 }
 
 bool WardenServer::SendCompatibilityTimingProbe()
@@ -995,11 +999,15 @@ void WardenServer::CompleteProfileProbe(std::vector<Bytes>&& results)
     // Install them only after the fourth probe proves the exact current-Grunt
     // adapter; stock and legacy clients never receive this record.
     if (m_architecture == WardenArchitecture::X86 &&
-        variant == ClientVariant::Grunt &&
-        !SendDeferredFilesystemInitialization())
+        variant == ClientVariant::Grunt)
     {
-        Fail(WardenFailure::SendFailure);
-        return;
+        WardenFailure const failure =
+            SendDeferredFilesystemInitialization();
+        if (failure != WardenFailure::None)
+        {
+            Fail(failure);
+            return;
+        }
     }
     if (!BuildPendingPlan(CheckPlanPurpose::Initial))
         Fail(WardenFailure::UnsupportedProfile);
@@ -1195,6 +1203,12 @@ void WardenServerTestAccess::ForceNextArchitectureMatches(
     server.m_forceArchitectureMatches = true;
     server.m_forcedX86Match = x86;
     server.m_forcedX64Match = x64;
+}
+
+WardenFailure WardenServerTestAccess::TryDeferredFilesystemInitialization(
+    WardenServer& server)
+{
+    return server.SendDeferredFilesystemInitialization();
 }
 
 bool WardenServerTestAccess::PreviewCommittedClientPlaintext(

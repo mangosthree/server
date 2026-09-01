@@ -543,6 +543,29 @@ TEST(WardenEnforcementPolicy_lifecycle_failure_closes_only_enforcing_modes)
         warden::WardenCheckOutcome::Unavailable);
 }
 
+TEST(WardenEnforcementPolicy_client_patch_requirement_closes_every_mode)
+{
+    warden::WardenLifecycleEvent required;
+    required.state = warden::WardenState::Failed;
+    required.failure = warden::WardenFailure::ClientPatchRequired;
+
+    for (warden::WardenEnforcementMode mode :
+        {warden::WardenEnforcementMode::Observe,
+            warden::WardenEnforcementMode::Kick,
+            warden::WardenEnforcementMode::KickAndBan})
+    {
+        for (bool requireExactProfile : {false, true})
+        {
+            warden::WardenEnforcementPolicy policy(mode,
+                requireExactProfile);
+            warden::WardenPolicyDecision const decision =
+                policy.EvaluateLifecycle(required);
+            CHECK(decision.action == warden::WardenPolicyAction::Kick);
+            CHECK(policy.AbortPendingConfirmations().empty());
+        }
+    }
+}
+
 TEST(WardenEnforcementPolicy_permissive_exact_profile_disengages_on_contract_failure)
 {
     warden::WardenEnforcementPolicy policy(

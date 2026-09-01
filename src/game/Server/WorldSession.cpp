@@ -155,6 +155,8 @@ char const* WardenFailureName(warden::WardenFailure failure)
             return "ProfileUnclassified";
         case warden::WardenFailure::InvalidEvidenceBatch:
             return "InvalidEvidenceBatch";
+        case warden::WardenFailure::ClientPatchRequired:
+            return "ClientPatchRequired";
     }
     return "Invalid";
 }
@@ -475,10 +477,31 @@ void WorldSession::HandleWardenLifecycle(
         return;
     }
 
-    sLog.outError("Warden protocol failed for account %u (failure %s; "
-        "architecture %s).", GetAccountId(),
-        WardenFailureName(event.failure),
-        WardenArchitectureName(event.architecture));
+    bool const clientPatchRequired =
+        event.failure == warden::WardenFailure::ClientPatchRequired;
+    if (clientPatchRequired)
+    {
+        if (event.variant == warden::ClientVariant::LegacyGrunt)
+        {
+            sLog.outError("Warden recognized the legacy x86 client patch for "
+                "account %u; the current patch is required. Closing the "
+                "client without recording a cheating incident.",
+                GetAccountId());
+        }
+        else
+        {
+            sLog.outError("Warden could not verify the required current x86 "
+                "client patch for account %u; closing the client without "
+                "recording a cheating incident.", GetAccountId());
+        }
+    }
+    else
+    {
+        sLog.outError("Warden protocol failed for account %u (failure %s; "
+            "architecture %s).", GetAccountId(),
+            WardenFailureName(event.failure),
+            WardenArchitectureName(event.architecture));
+    }
     PersistWardenOperationalAudit(event.failure);
 
     warden::WardenPolicyDecision lifecycle;
@@ -490,8 +513,11 @@ void WorldSession::HandleWardenLifecycle(
     RequestWardenDisengagement();
     if (lifecycle.action == warden::WardenPolicyAction::Kick)
     {
-        sLog.outError("Warden is closing incompatible client account %u; "
-            "no cheating incident was recorded.", GetAccountId());
+        if (!clientPatchRequired)
+        {
+            sLog.outError("Warden is closing incompatible client account %u; "
+                "no cheating incident was recorded.", GetAccountId());
+        }
         KickPlayer();
     }
 }
@@ -830,8 +856,8 @@ void WorldSession::StartWardenBootstrap()
 
 void WorldSession::UpdateWarden(uint32 diffMs)
 {
-    // Bootstrap deadlines charge at the character screen. `eligible` gates
-    // only profile probes and genuine scans until a player is in world.
+    // Bootstrap and exact executable fingerprinting run at character select.
+    // Only genuine scan plans remain gated until a player is fully in world.
     if (!m_warden || !m_Socket || m_Socket->IsClosed())
         return;
 
@@ -846,8 +872,9 @@ void WorldSession::UpdateWarden(uint32 diffMs)
     }
 
     Player* const player = GetPlayer();
-    bool const eligible = player && player->IsInWorld() && !m_playerLoading;
-    m_warden->Update(eligible, diffMs);
+    bool const scanEligible =
+        player && player->IsInWorld() && !m_playerLoading;
+    m_warden->Update(scanEligible, diffMs);
     FinalizeWardenDisengagement();
 }
 

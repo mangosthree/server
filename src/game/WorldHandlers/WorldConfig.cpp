@@ -140,6 +140,8 @@ bool World::LoadConfigSettings(bool reload)
         "Warden.EnforcementMode", 0));
     rawWarden.requireExactProfile = sConfig.GetBoolDefault(
         "Warden.RequireExactProfile", true);
+    rawWarden.requireCurrentX86Patch = sConfig.GetBoolDefault(
+        "Warden.RequireCurrentX86Patch", true);
     rawWarden.normalMinSeconds = static_cast<uint32>(sConfig.GetIntDefault(
         "Warden.CheckIntervalMin", 30));
     rawWarden.normalMaxSeconds = static_cast<uint32>(sConfig.GetIntDefault(

@@ -147,8 +147,18 @@ WardenEnforcementPolicy::AbortPendingConfirmations()
 WardenPolicyDecision WardenEnforcementPolicy::EvaluateLifecycle(
     WardenLifecycleEvent const& event) const
 {
-    if (event.state != WardenState::Failed ||
-        m_mode == WardenEnforcementMode::Observe || !m_requireExactProfile)
+    if (event.state != WardenState::Failed)
+        return {};
+
+    // A required x86 patch that is legacy or cannot be verified is a
+    // compatibility rejection, not cheat enforcement. Close it in every mode
+    // without creating evidence.
+    if (event.failure == WardenFailure::ClientPatchRequired)
+    {
+        return {WardenPolicyAction::Kick};
+    }
+
+    if (m_mode == WardenEnforcementMode::Observe || !m_requireExactProfile)
     {
         return {};
     }

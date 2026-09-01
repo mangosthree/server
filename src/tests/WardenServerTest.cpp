@@ -222,7 +222,8 @@ struct Harness
         std::shared_ptr<warden::WardenCheckCatalog const> checkOverride = {},
         uint32 normalMinSeconds = 1, uint32 normalMaxSeconds = 1,
         uint32 aggressiveMinSeconds = 1,
-        uint32 aggressiveMaxSeconds = 1)
+        uint32 aggressiveMaxSeconds = 1,
+        bool requireCurrentX86Patch = true)
         : modules(std::make_shared<warden::WardenModuleCatalog const>(
               warden::test::BuildSyntheticModuleCatalog())),
           checks(checkOverride ? std::move(checkOverride) :
@@ -237,6 +238,8 @@ struct Harness
         options.locale = std::move(locale);
         options.sessionKey = warden::test::SyntheticSessionKey();
         options.configuration.enforcementMode = enforcementMode;
+        options.configuration.requireCurrentX86Patch =
+            requireCurrentX86Patch;
         options.configuration.normalMinSeconds = normalMinSeconds;
         options.configuration.normalMaxSeconds = normalMaxSeconds;
         options.configuration.aggressiveMinSeconds = aggressiveMinSeconds;
@@ -398,6 +401,7 @@ struct Harness
                 warden::test::X64StockFingerprint();
         warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
             *server, std::move(probe));
+        server->Update(true, 0);
         if (server->GetState() != warden::WardenState::InitialChecksSent)
             return false;
 
@@ -661,6 +665,7 @@ TEST(WardenServer_x86_real_module_check_flow_reaches_healthy)
     REQUIRE(BuildClientCheckResult(*probe,
         warden::test::X86StockFingerprint(), probeResult));
     harness.SendClient(std::move(probeResult));
+    harness.server->Update(true, 0);
     CHECK(harness.server->GetState() ==
         warden::WardenState::InitialChecksSent);
 
@@ -693,6 +698,7 @@ TEST(WardenServer_x86_current_grunt_initializes_filesystem_before_mpq_plan)
         warden::test::X86GruntFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *harness.server, std::move(probe));
+    harness.server->Update(true, 0);
     CHECK(harness.server->GetState() ==
         warden::WardenState::InitialChecksSent);
 
@@ -732,17 +738,87 @@ TEST(WardenServer_x86_current_grunt_initializes_filesystem_before_mpq_plan)
         path.end()) != request.end());
 }
 
-TEST(WardenServer_x86_legacy_grunt_remains_healthy_without_filesystem_or_mpq)
+TEST(WardenServer_x86_legacy_patch_requirement_fails_before_filesystem_or_mpq)
 {
     Harness harness;
     REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
-    harness.server->Update(true, 0);
+    harness.server->Update(false, 0);
+    REQUIRE(!harness.ReadServer().empty()); // Profile-probe request.
+    std::size_t const sentBeforeResult = harness.sent.size();
+
+    std::vector<warden::Bytes> probe =
+        warden::test::X86LegacyGruntFingerprint();
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *harness.server, std::move(probe));
+
+    CHECK(harness.server->GetState() == warden::WardenState::Failed);
+    CHECK(harness.server->GetFailure() ==
+        warden::WardenFailure::ClientPatchRequired);
+    REQUIRE(!harness.events.empty());
+    CHECK(harness.events.back().variant ==
+        warden::ClientVariant::LegacyGrunt);
+    CHECK_EQ(harness.sent.size(), sentBeforeResult);
+    CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server).has_value());
+    CHECK(harness.evidence.empty());
+}
+
+TEST(WardenServer_x86_required_patch_profile_probe_timeout_is_compatibility_rejection)
+{
+    Harness x86;
+    REQUIRE(x86.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    x86.server->Update(false, 0);
+    REQUIRE(x86.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    REQUIRE(!x86.ReadServer().empty());
+
+    x86.server->Update(false, 30000);
+    CHECK(x86.server->GetState() == warden::WardenState::Failed);
+    CHECK(x86.server->GetFailure() ==
+        warden::WardenFailure::ClientPatchRequired);
+
+    Harness x64;
+    REQUIRE(x64.ReachReadyForWorld(warden::WardenArchitecture::X64));
+    x64.server->Update(false, 0);
+    REQUIRE(x64.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    REQUIRE(!x64.ReadServer().empty());
+
+    x64.server->Update(false, 30000);
+    CHECK(x64.server->GetState() == warden::WardenState::Failed);
+    CHECK(x64.server->GetFailure() ==
+        warden::WardenFailure::DeadlineExpired);
+
+    Harness optionalX86(true, "enUS", warden::WardenEnforcementMode::Observe,
+        {}, 1, 1, 1, 1, false);
+    REQUIRE(optionalX86.ReachReadyForWorld(
+        warden::WardenArchitecture::X86));
+    optionalX86.server->Update(false, 0);
+    REQUIRE(optionalX86.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    REQUIRE(!optionalX86.ReadServer().empty());
+
+    optionalX86.server->Update(false, 30000);
+    CHECK(optionalX86.server->GetState() == warden::WardenState::Failed);
+    CHECK(optionalX86.server->GetFailure() ==
+        warden::WardenFailure::DeadlineExpired);
+}
+
+TEST(WardenServer_x86_legacy_grunt_remains_healthy_when_requirement_disabled)
+{
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        {}, 1, 1, 1, 1, false);
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    harness.server->Update(false, 0);
     REQUIRE(!harness.ReadServer().empty()); // Profile-probe request.
 
     std::vector<warden::Bytes> probe =
         warden::test::X86LegacyGruntFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *harness.server, std::move(probe));
+    CHECK(harness.server->GetState() ==
+        warden::WardenState::ProfileClassified);
+    harness.server->Update(true, 0);
     CHECK(harness.server->GetState() ==
         warden::WardenState::InitialChecksSent);
 
@@ -781,6 +857,7 @@ TEST(WardenServer_x86_late_filesystem_send_failure_is_operational)
         warden::test::X86GruntFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *harness.server, std::move(probe));
+    harness.server->Update(true, 0);
     CHECK(harness.server->GetState() == warden::WardenState::Failed);
     CHECK(harness.server->GetFailure() == warden::WardenFailure::SendFailure);
     CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
@@ -800,7 +877,7 @@ TEST(WardenServer_x86_deferred_filesystem_encode_failure_is_unsupported)
     CHECK_EQ(harness.sent.size(), sentBefore);
 }
 
-TEST(WardenServer_x86_mutated_adapter_probe_fails_before_filesystem_init)
+TEST(WardenServer_x86_unrecognized_adapter_requires_current_patch_without_filesystem_init)
 {
     Harness harness;
     REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
@@ -815,12 +892,29 @@ TEST(WardenServer_x86_mutated_adapter_probe_fails_before_filesystem_init)
         *harness.server, std::move(probe));
     CHECK(harness.server->GetState() == warden::WardenState::Failed);
     CHECK(harness.server->GetFailure() ==
-        warden::WardenFailure::ProfileUnclassified);
+        warden::WardenFailure::ClientPatchRequired);
     CHECK_EQ(harness.sent.size(), sentBeforeResult);
     CHECK(harness.evidence.empty());
+
+    Harness optional(true, "enUS", warden::WardenEnforcementMode::Observe,
+        {}, 1, 1, 1, 1, false);
+    REQUIRE(optional.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    optional.server->Update(false, 0);
+    REQUIRE(!optional.ReadServer().empty());
+    std::size_t const optionalSentBeforeResult = optional.sent.size();
+
+    probe = warden::test::X86GruntFingerprint();
+    probe[3][0] ^= 0x01;
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *optional.server, std::move(probe));
+    CHECK(optional.server->GetState() == warden::WardenState::Failed);
+    CHECK(optional.server->GetFailure() ==
+        warden::WardenFailure::ProfileUnclassified);
+    CHECK_EQ(optional.sent.size(), optionalSentBeforeResult);
+    CHECK(optional.evidence.empty());
 }
 
-TEST(WardenServer_x86_malformed_real_check_result_is_operational)
+TEST(WardenServer_x86_malformed_profile_probe_requires_current_patch)
 {
     Harness harness;
     REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
@@ -838,7 +932,7 @@ TEST(WardenServer_x86_malformed_real_check_result_is_operational)
 
     CHECK(harness.server->GetState() == warden::WardenState::Failed);
     CHECK(harness.server->GetFailure() ==
-        warden::WardenFailure::MalformedPayload);
+        warden::WardenFailure::ClientPatchRequired);
     CHECK(harness.evidence.empty());
 }
 
@@ -974,20 +1068,57 @@ TEST(WardenServer_plan_send_failure_preserves_transport_reason)
     CHECK(harness.server->GetFailure() == warden::WardenFailure::SendFailure);
 }
 
-TEST(WardenServer_in_world_gate_and_complete_batch_gate_prevent_early_healthy)
+TEST(WardenServer_profile_probe_pre_world_defers_initial_checks_until_world)
+{
+    auto const checks = std::make_shared<warden::WardenCheckCatalog const>(
+        BuildProductionShapedX86Catalog());
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        checks);
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+
+    harness.server->Update(false, 60000);
+    REQUIRE(harness.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    REQUIRE(!harness.ReadServer().empty());
+
+    std::vector<warden::Bytes> probe =
+        warden::test::X86GruntFingerprint();
+    warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
+        *harness.server, std::move(probe));
+    CHECK(harness.server->GetState() ==
+        warden::WardenState::ProfileClassified);
+    CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server).has_value());
+    std::size_t const sentAfterClassification = harness.sent.size();
+
+    harness.server->Update(false, 60000);
+    CHECK(harness.server->GetState() ==
+        warden::WardenState::ProfileClassified);
+    CHECK_EQ(harness.sent.size(), sentAfterClassification);
+
+    harness.server->Update(true, 0);
+    CHECK(harness.server->GetState() ==
+        warden::WardenState::InitialChecksSent);
+    CHECK(warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server).has_value());
+
+    warden::Bytes const filesystem = harness.ReadServer();
+    REQUIRE(!filesystem.empty());
+    CHECK_EQ(filesystem.front(), uint8(3));
+    warden::Bytes const request = harness.ReadServer();
+    REQUIRE(!request.empty());
+    CHECK_EQ(request.front(), uint8(2));
+}
+
+TEST(WardenServer_complete_batch_gate_prevents_early_healthy)
 {
     Harness harness;
     REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
-    harness.server->Update(false, 60000);
-    CHECK(harness.server->GetState() == warden::WardenState::ReadyForWorld);
-    std::vector<warden::WardenState> const states = States(harness);
-    CHECK(std::find(states.begin(), states.end(),
-        warden::WardenState::Healthy) == states.end());
-
     harness.server->Update(true, 0);
     std::vector<warden::Bytes> probe = warden::test::X86StockFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *harness.server, std::move(probe));
+    harness.server->Update(true, 0);
     REQUIRE(harness.server->GetState() ==
         warden::WardenState::InitialChecksSent);
     std::optional<warden::CheckPlan> const plan =
@@ -1005,6 +1136,7 @@ TEST(WardenServer_in_world_gate_and_complete_batch_gate_prevent_early_healthy)
     probe = warden::test::X86StockFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *mismatch.server, std::move(probe));
+    mismatch.server->Update(true, 0);
     std::optional<warden::CheckPlan> const mismatchPlan =
         warden::WardenServerTestAccess::PendingCheckPlan(
         *mismatch.server);
@@ -1280,6 +1412,7 @@ TEST(WardenServer_nonclean_initial_batch_enters_recurring_for_confirmation)
         warden::test::X86StockFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *harness.server, std::move(probe));
+    harness.server->Update(true, 0);
 
     std::optional<warden::CheckPlan> initial =
         warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
@@ -1351,6 +1484,7 @@ TEST(WardenServer_nonterminal_observer_failure_stops_follow_on_mutation)
     probe = warden::test::X86StockFingerprint();
     warden::WardenServerTestAccess::CompleteSyntheticProfileProbe(
         *healthy.server, std::move(probe));
+    healthy.server->Update(true, 0);
     std::optional<warden::CheckPlan> const initial =
         warden::WardenServerTestAccess::PendingCheckPlan(*healthy.server);
     REQUIRE(initial.has_value());
@@ -1379,6 +1513,7 @@ TEST(WardenServer_x64_real_module_check_flow_reaches_healthy)
     REQUIRE(BuildClientCheckResult(*probe,
         warden::test::X64StockFingerprint(), probeResult));
     harness.SendClient(std::move(probeResult));
+    harness.server->Update(true, 0);
     CHECK(harness.server->GetState() ==
         warden::WardenState::InitialChecksSent);
 
@@ -1426,6 +1561,7 @@ TEST(WardenServer_x64_mpq_checks_compose_end_to_end)
     REQUIRE(BuildClientCheckResult(*probe,
         warden::test::X64StockFingerprint(), probeResult));
     harness.SendClient(std::move(probeResult));
+    harness.server->Update(true, 0);
 
     std::optional<warden::CheckPlan> initial =
         warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
@@ -1476,6 +1612,7 @@ TEST(WardenServer_x64_unstable_timing_is_nonactionable_and_recurs)
     REQUIRE(BuildClientCheckResult(*probe,
         warden::test::X64StockFingerprint(), probeResult));
     harness.SendClient(std::move(probeResult));
+    harness.server->Update(true, 0);
 
     std::optional<warden::CheckPlan> initial =
         warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);

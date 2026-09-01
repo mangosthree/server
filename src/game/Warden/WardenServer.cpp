@@ -332,6 +332,18 @@ bool WardenServer::HasChargedDeadline() const
     }
 }
 
+WardenFailure WardenServer::ClassifyClientProfileFailure(
+    WardenFailure failure) const
+{
+    if (m_state == WardenState::ProfileProbeSent &&
+        m_architecture == WardenArchitecture::X86 &&
+        m_configuration.requireCurrentX86Patch)
+    {
+        return WardenFailure::ClientPatchRequired;
+    }
+    return failure;
+}
+
 void WardenServer::NotifyLifecycle()
 {
     if (!m_lifecycle || m_notifying)
@@ -797,7 +809,7 @@ void WardenServer::HandleClientFrame(ByteView worldPayload)
     DecodedClientFrame decoded;
     if (DecodeClientFrame(worldPayload, decoded) != FrameDecodeStatus::Ok)
     {
-        Fail(WardenFailure::MalformedFrame);
+        Fail(ClassifyClientProfileFailure(WardenFailure::MalformedFrame));
         return;
     }
 
@@ -808,7 +820,7 @@ void WardenServer::HandleClientFrame(ByteView worldPayload)
     if (!candidate.IsInitialized() ||
         !candidate.TransformClientToServer(plain))
     {
-        Fail(WardenFailure::CryptoFailure);
+        Fail(ClassifyClientProfileFailure(WardenFailure::CryptoFailure));
         return;
     }
     switch (m_state)
@@ -912,6 +924,38 @@ bool WardenServer::BeginProfileProbe()
     return BuildPendingPlan(CheckPlanPurpose::ProfileProbe);
 }
 
+bool WardenServer::BeginInitialChecks()
+{
+    if (m_state != WardenState::ProfileClassified || !m_planner)
+    {
+        return false;
+    }
+
+    // The initial x86 command 3 deliberately withholds filesystem callbacks.
+    // Install them only after the fourth probe proves the exact current-Grunt
+    // adapter and the player is eligible for genuine in-world scans.
+    if (m_architecture == WardenArchitecture::X86 &&
+        m_variant == ClientVariant::Grunt)
+    {
+        WardenFailure const failure =
+            SendDeferredFilesystemInitialization();
+        if (failure != WardenFailure::None)
+        {
+            Fail(failure);
+            return false;
+        }
+    }
+    if (!BuildPendingPlan(CheckPlanPurpose::Initial))
+    {
+        if (m_state != WardenState::Failed)
+        {
+            Fail(WardenFailure::UnsupportedProfile);
+        }
+        return false;
+    }
+    return true;
+}
+
 void WardenServer::HandleCheckResult(Bytes const& plain,
     WardenCryptoContext&& candidate)
 {
@@ -927,7 +971,7 @@ void WardenServer::HandleCheckResult(Bytes const& plain,
             decoded) != DecodeStatus::Ok)
     {
         CleanseCheckBatchResult(decoded);
-        Fail(WardenFailure::MalformedPayload);
+        Fail(ClassifyClientProfileFailure(WardenFailure::MalformedPayload));
         return;
     }
 
@@ -941,7 +985,8 @@ void WardenServer::HandleCheckResult(Bytes const& plain,
     CleanseCheckBatchResult(decoded);
     if (!prepared)
     {
-        Fail(WardenFailure::InvalidEvidenceBatch);
+        Fail(ClassifyClientProfileFailure(
+            WardenFailure::InvalidEvidenceBatch));
         return;
     }
 
@@ -975,13 +1020,21 @@ void WardenServer::CompleteProfileProbe(std::vector<Bytes>&& results)
     // Preserve recognized-but-unsupported variants in the terminal lifecycle
     // event so the adapter can persist only their bounded audit token.
     m_variant = variant;
+    if (m_architecture == WardenArchitecture::X86 &&
+        variant == ClientVariant::LegacyGrunt &&
+        m_configuration.requireCurrentX86Patch)
+    {
+        Fail(WardenFailure::ClientPatchRequired);
+        return;
+    }
     bool const selectable = variant == ClientVariant::Stock ||
         variant == ClientVariant::Grunt ||
         (m_architecture == WardenArchitecture::X86 &&
             variant == ClientVariant::LegacyGrunt);
     if (!selectable)
     {
-        Fail(WardenFailure::ProfileUnclassified);
+        Fail(ClassifyClientProfileFailure(
+            WardenFailure::ProfileUnclassified));
         return;
     }
     WardenCheckProfile const* profile = m_checks->FindProfileExact(
@@ -993,24 +1046,6 @@ void WardenServer::CompleteProfileProbe(std::vector<Bytes>&& results)
     }
     m_planner.emplace(*profile);
     Transition(WardenState::ProfileClassified);
-    if (m_state == WardenState::Failed)
-        return;
-    // The initial x86 command 3 deliberately withholds filesystem callbacks.
-    // Install them only after the fourth probe proves the exact current-Grunt
-    // adapter; stock and legacy clients never receive this record.
-    if (m_architecture == WardenArchitecture::X86 &&
-        variant == ClientVariant::Grunt)
-    {
-        WardenFailure const failure =
-            SendDeferredFilesystemInitialization();
-        if (failure != WardenFailure::None)
-        {
-            Fail(failure);
-            return;
-        }
-    }
-    if (!BuildPendingPlan(CheckPlanPurpose::Initial))
-        Fail(WardenFailure::UnsupportedProfile);
 }
 
 void WardenServer::CompleteEvidenceBatch(WardenEvidenceBatch&& batch)
@@ -1089,7 +1124,7 @@ bool WardenServer::ValidateEvidenceBatch(
     return true;
 }
 
-void WardenServer::Update(bool eligible, uint32 diffMs)
+void WardenServer::Update(bool scanEligible, uint32 diffMs)
 {
     if (m_inSendCallback)
         return;
@@ -1099,7 +1134,8 @@ void WardenServer::Update(bool eligible, uint32 diffMs)
     {
         if (diffMs >= m_remainingDeadlineMs)
         {
-            Fail(WardenFailure::DeadlineExpired);
+            Fail(ClassifyClientProfileFailure(
+                WardenFailure::DeadlineExpired));
             return;
         }
         m_remainingDeadlineMs -= diffMs;
@@ -1107,11 +1143,24 @@ void WardenServer::Update(bool eligible, uint32 diffMs)
 
     if (m_state == WardenState::ReadyForWorld)
     {
-        if (eligible && !BeginProfileProbe())
-            Fail(WardenFailure::UnsupportedProfile);
+        if (!BeginProfileProbe())
+        {
+            if (m_state != WardenState::Failed)
+            {
+                Fail(WardenFailure::UnsupportedProfile);
+            }
+        }
         return;
     }
-    if (!eligible || (m_state != WardenState::Healthy &&
+    if (m_state == WardenState::ProfileClassified)
+    {
+        if (scanEligible)
+        {
+            BeginInitialChecks();
+        }
+        return;
+    }
+    if (!scanEligible || (m_state != WardenState::Healthy &&
             m_state != WardenState::Recurring) || m_pendingPlan)
     {
         return;

@@ -193,7 +193,9 @@ if(UPDATE_FUNCTION_AT EQUAL -1)
     message(FATAL_ERROR "Warden update function is missing")
 endif()
 string(SUBSTRING "${SESSION_SOURCE_TEXT}" ${UPDATE_FUNCTION_AT} -1 UPDATE_TAIL)
-require_order(UPDATE_TAIL "m_warden->Update(eligible, diffMs)"
+require_text(UPDATE_TAIL "bool const scanEligible ="
+    "Warden update must distinguish real-scan eligibility")
+require_order(UPDATE_TAIL "m_warden->Update(scanEligible, diffMs)"
     "FinalizeWardenDisengagement()"
     "Update must finalize only after returning")
 
@@ -205,10 +207,14 @@ require_text(WORLD_CONFIG_TEXT "\"Warden.EnforcementMode\", 0"
     "missing-key Warden fallback must remain observe-only")
 require_text(CONF_TEXT "Warden.RequireExactProfile   = 1"
     "exact-profile configuration is missing")
+require_text(CONF_TEXT "Warden.RequireCurrentX86Patch = 1"
+    "current x86 client patch must be required by default")
+require_text(WORLD_CONFIG_TEXT "\"Warden.RequireCurrentX86Patch\", true"
+    "missing-key current x86 patch fallback must reject legacy clients")
 if(CONF_TEXT MATCHES "Warden[.]Enabled")
     message(FATAL_ERROR "Warden must not have a master disable switch")
 endif()
-require_text(PARAMS_TEXT "set(MANGOS_WORLD_VER 2026082600)"
+require_text(PARAMS_TEXT "set(MANGOS_WORLD_VER 2026090100)"
     "mangosd configuration version was not advanced")
 require_text(REVISIONS_TEXT "#define REALMD_DB_STRUCTURE_NR      \"5\""
     "Realm structure requirement must be 22/05/001")

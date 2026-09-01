@@ -59,6 +59,9 @@ struct WardenRawConfiguration
     // When false, missing/unsupported profiles and protocol lifecycle failures
     // disengage Warden for the session instead of enforcing admission.
     bool requireExactProfile = true;
+    // Require a verified x86 profile before any unsafe archive callback can be
+    // selected. This is compatibility policy, not evidence.
+    bool requireCurrentX86Patch = true;
     uint32 normalMinSeconds = 30;
     uint32 normalMaxSeconds = 60;
     uint32 aggressiveMinSeconds = 10;
@@ -76,6 +79,8 @@ struct WardenConfiguration
     // This is an operational admission gate only; confirmed cheat evidence
     // remains actionable regardless of its value.
     bool requireExactProfile = true;
+    // A legacy or unverified x86 patch is incompatible even in observe mode.
+    bool requireCurrentX86Patch = true;
     uint32 normalMinSeconds = 30;
     uint32 normalMaxSeconds = 60;
     uint32 aggressiveMinSeconds = 10;

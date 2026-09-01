@@ -55,6 +55,7 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
     // a valid enforcement or threshold choice.
     WardenConfigurationNormalization result;
     result.value.requireExactProfile = raw.requireExactProfile;
+    result.value.requireCurrentX86Patch = raw.requireCurrentX86Patch;
 
     if (raw.enforcementMode <=
         static_cast<uint32>(WardenEnforcementMode::KickAndBan))

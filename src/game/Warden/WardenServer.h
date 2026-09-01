@@ -83,7 +83,8 @@ enum class WardenFailure : uint8
     CryptoFailure,
     SendFailure,
     ProfileUnclassified,
-    InvalidEvidenceBatch
+    InvalidEvidenceBatch,
+    ClientPatchRequired
 };
 
 /** Secret-free transition fact for the session lifecycle adapter. */
@@ -122,7 +123,7 @@ public:
     ~WardenServer();
     bool Start();
     void HandleClientFrame(ByteView worldPayload);
-    void Update(bool eligible, uint32 diffMs);
+    void Update(bool scanEligible, uint32 diffMs);
     WardenState GetState() const;
     WardenFailure GetFailure() const;
     bool QueueConfirmation(uint32 checkId);
@@ -151,6 +152,7 @@ private:
     bool SendCompatibilityTimingProbe();
     bool HasCompleteSelectedProfiles() const;
     bool BeginProfileProbe();
+    bool BeginInitialChecks();
     bool BuildPendingPlan(CheckPlanPurpose purpose,
         uint32 confirmationCheckId = 0);
     void HandleCheckResult(Bytes const& plain,
@@ -160,6 +162,8 @@ private:
     bool ValidateEvidenceBatch(WardenEvidenceBatch const& batch) const;
     bool SelectScheduleMilliseconds(uint32& milliseconds) const;
     bool HasChargedDeadline() const;
+    /** Maps failed mandatory x86 fingerprint responses to a compatibility gate. */
+    WardenFailure ClassifyClientProfileFailure(WardenFailure failure) const;
     void ResetDeadline();
     void Transition(WardenState state);
     void Fail(WardenFailure failure);

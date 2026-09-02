@@ -365,7 +365,12 @@ void WaypointMovementGenerator::BuildSmoothPath(Creature& creature,
     Motion::IMotionFrame const& frame = Motion::FrameFor(creature);
     const std::unique_ptr<Motion::IPathQuery> query = frame.CreatePathQuery(creature);
 
-    Motion::Vector3 start = frame.MoverPosition(creature);
+    // Resolve through the same side-effect-free selector Launch uses. A vehicle
+    // seat, live spline or pending stop can be authoritative over Where(), and
+    // the exact first wire point defines the packed-path quantization grid.
+    const Motion::Vector3 launchPosition =
+        Movement::MoveSplineInit::ResolveLaunchPosition(creature);
+    Motion::Vector3 start = launchPosition;
 
     // Bounding box of the points committed so far. We keep extending the chunk through
     // consecutive smoothable waypoints until the box would exceed the packable offset
@@ -441,7 +446,12 @@ void WaypointMovementGenerator::BuildSmoothPath(Creature& creature,
     }
 
     // A chunk of one waypoint is not a smoothed segment; let the driver route it.
-    if (m_segment.size() <= 1 || m_legPoints.size() < 2)
+    // Also reject the whole chunk if the client-side packed reconstruction would
+    // collapse adjacent points. Pruning here would leave the server's spline out
+    // of step with the client, while this fallback lets the driver route one safe
+    // waypoint leg at a time.
+    if (m_segment.size() <= 1 || m_legPoints.size() < 2 ||
+        !IsWaypointSmoothingWireSafe(m_legPoints, launchPosition))
     {
         ClearSegment();
         m_legPoints.clear();

@@ -35,6 +35,39 @@
 
 namespace
 {
+    TransportInfo* ActiveVehicleTransport(Unit& unit)
+    {
+        TransportInfo* transportInfo = unit.GetTransportInfo();
+        return transportInfo && transportInfo->IsOnVehicle() ? transportInfo : NULL;
+    }
+
+    Movement::Location ResolveLaunchLocation(Unit& unit, TransportInfo* transportInfo)
+    {
+        Movement::MoveSpline& moveSpline = *unit.movespline;
+        Movement::Location position(unit.Where().X(), unit.Where().Y(), unit.Where().Z(),
+                                    unit.Where().Facing());
+
+        if (transportInfo)
+        {
+            Geometry::Placement const& seat = transportInfo->Seat();
+            return Movement::Location(seat.X(), seat.Y(), seat.Z(), seat.Facing());
+        }
+
+        // A running spline is authoritative until Unit placement catches up.
+        if (!moveSpline.Finalized())
+        {
+            return moveSpline.ComputePosition();
+        }
+
+        // Stop() records the sent position until the next Unit update commits it.
+        if (Position const* pending = unit.PendingSplineCommit())
+        {
+            return Movement::Location(pending->x, pending->y, pending->z, pending->o);
+        }
+
+        return position;
+    }
+
     /// The vessel whose deck this unit is standing on, or an empty guid. Derived from the
     /// map, so a spline goes out as SMSG_MONSTER_MOVE_TRANSPORT for anything on a deck --
     /// crew, pet or totem alike -- without anyone having registered it as anything.
@@ -56,6 +89,11 @@ namespace
 
 namespace Movement
 {
+    Vector3 MoveSplineInit::ResolveLaunchPosition(Unit& unit)
+    {
+        return ResolveLaunchLocation(unit, ActiveVehicleTransport(unit));
+    }
+
     /**
      * @brief Selects the appropriate speed type based on movement flags.
      * @param moveFlags The movement flags.
@@ -108,40 +146,11 @@ namespace Movement
         // A VEHICLE seat is a real transform the server owns, so a rider's pose has to be
         // fetched from it. A DECK is not: the unit's map is the vessel and its position is
         // already deck-local, so Where() is the answer and nothing is composed.
-        TransportInfo* transportInfo = unit.GetTransportInfo();
-        if (transportInfo && !transportInfo->IsOnVehicle())
-        {
-            transportInfo = NULL;
-        }
+        TransportInfo* transportInfo = ActiveVehicleTransport(unit);
 
         const ObjectGuid vesselGuid = DeckVesselGuidOf(unit);
 
-        Location real_position(unit.Where().X(), unit.Where().Y(), unit.Where().Z(), unit.Where().Facing());
-
-        if (transportInfo)
-        {
-            Geometry::Placement const& deck = transportInfo->Seat();
-            real_position.x = deck.X();
-            real_position.y = deck.Y();
-            real_position.z = deck.Z();
-            real_position.orientation = deck.Facing();
-        }
-
-        // there is a big chance that current position is unknown if current state is not finalized, need compute it
-        // this also allows calculate spline position and update map position in much greater intervals
-        if (!move_spline.Finalized() && !transportInfo)
-        {
-            real_position = move_spline.ComputePosition();
-        }
-        else if (!transportInfo)
-        {
-            // A stop just took the spline's position and the placement has not caught up
-            // (it is written on the unit's next Update): start from where the stop was sent.
-            if (Position const* pending = unit.PendingSplineCommit())
-            {
-                real_position = Location(pending->x, pending->y, pending->z, pending->o);
-            }
-        }
+        Location real_position = ResolveLaunchLocation(unit, transportInfo);
 
         if (args.path.empty())
         {

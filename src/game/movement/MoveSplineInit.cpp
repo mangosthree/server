@@ -89,7 +89,7 @@ namespace
 
 namespace Movement
 {
-    Vector3 MoveSplineInit::ResolveLaunchPosition() const
+    Vector3 MoveSplineInit::ResolveLaunchPosition(Unit& unit)
     {
         return ResolveLaunchLocation(unit, ActiveVehicleTransport(unit));
     }

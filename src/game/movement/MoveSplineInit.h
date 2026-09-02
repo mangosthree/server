@@ -61,6 +61,13 @@ namespace Movement
             int32 Launch();
 
             /**
+             * @brief Resolves the exact first point a launch would put on the wire.
+             * @return The vehicle-seat, live-spline, pending-stop or placed position
+             *         selected by Launch for this unit.
+             */
+            Vector3 ResolveLaunchPosition() const;
+
+            /**
              * @brief Stops any creature movement.
              */
             void Stop();

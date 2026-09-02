@@ -150,4 +150,15 @@ bool IsWaypointSmoothingWithinBudget(WaypointSmoothingBounds const& bounds);
 bool IsWaypointSmoothingWireSafe(std::vector<Geometry::Vector3> const& points,
                                  Geometry::Vector3 const& launchPosition);
 
+/**
+ * @brief Removes intermediate points that collapse after packed-path decoding.
+ * @param points Routed spline points to sanitize in place.
+ * @param launchPosition Exact first point that MoveSplineInit will put on the wire.
+ *
+ * The destination and every distinct decoded corner are retained, so a routed
+ * path does not degrade into an obstacle-crossing straight-line shortcut.
+ */
+bool SanitizeWaypointSmoothingWirePath(std::vector<Geometry::Vector3>& points,
+                                       Geometry::Vector3 const& launchPosition);
+
 #endif

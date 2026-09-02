@@ -186,3 +186,52 @@ bool IsWaypointSmoothingWireSafe(std::vector<Geometry::Vector3> const& points,
 
     return previous != points.back();
 }
+
+/**
+ * @brief Removes intermediate points that collapse after packed-path decoding.
+ * @param points Routed spline points to sanitize in place.
+ * @param launchPosition Exact first point that MoveSplineInit will put on the wire.
+ * @return True when the resulting path is safe to serialize.
+ */
+bool SanitizeWaypointSmoothingWirePath(std::vector<Geometry::Vector3>& points,
+                                       Geometry::Vector3 const& launchPosition)
+{
+    if (points.size() < 2)
+    {
+        return true;
+    }
+
+    const Geometry::Vector3 destination = points.back();
+    const Geometry::Vector3 midpoint = (launchPosition + destination) / 2.0f;
+    std::vector<Geometry::Vector3> sanitized;
+    std::vector<Geometry::Vector3> reconstructed;
+    sanitized.reserve(points.size());
+    reconstructed.reserve(points.size());
+    sanitized.push_back(launchPosition);
+
+    Geometry::Vector3 previous = launchPosition;
+    for (size_t i = 1; i + 1 < points.size(); ++i)
+    {
+        const Geometry::Vector3 current = ReconstructPackedPoint(midpoint, points[i]);
+        if (current == previous)
+        {
+            continue;
+        }
+
+        sanitized.push_back(points[i]);
+        reconstructed.push_back(current);
+        previous = current;
+    }
+
+    // The destination is uncompressed. Remove any retained packed point that
+    // reconstructs onto it so the final client-side segment remains non-zero.
+    while (!reconstructed.empty() && reconstructed.back() == destination)
+    {
+        reconstructed.pop_back();
+        sanitized.pop_back();
+    }
+
+    sanitized.push_back(destination);
+    points.swap(sanitized);
+    return IsWaypointSmoothingWireSafe(points, launchPosition);
+}

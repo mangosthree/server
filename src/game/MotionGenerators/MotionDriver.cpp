@@ -198,16 +198,17 @@ bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
         }
 
         // Waypoint smoothing may reject a generated leg and deliberately fall
-        // back through this general router. Apply the same packed-wire guard to
-        // that routed geometry so the fallback cannot recreate the collapsed
-        // client-side segment that was just rejected.
-        if (!IsWaypointSmoothingWireSafe(query->Points(), start))
+        // back through this general router. Sanitize that routed geometry using
+        // the same live-spline/vehicle position Launch will put on the wire. Only
+        // packed duplicate vertices are removed, preserving the routed corners.
+        Movement::PointsArray routedPath = query->Points();
+        if (!SanitizeWaypointSmoothingWirePath(routedPath, init.ResolveLaunchPosition()))
         {
             m_blocked = true;
             return false;
         }
 
-        init.MovebyPath(query->Points());
+        init.MovebyPath(routedPath);
         m_partialLeg = query->Partial();
     }
 

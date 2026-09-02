@@ -176,6 +176,18 @@ TEST(WardenConfiguration_invalid_threshold_pair_falls_back_together)
         warden::WardenConfigurationCorrection::Thresholds));
 }
 
+TEST(WardenConfiguration_negative_ban_threshold_falls_back_together)
+{
+    auto raw = ValidCustomConfiguration();
+    raw.banThreshold = -1;
+    auto const result = warden::NormalizeWardenConfiguration(raw);
+
+    CHECK_EQ(result.value.aggressiveThreshold, uint32(5));
+    CHECK_EQ(result.value.banThreshold, uint32(10));
+    CHECK(warden::HasWardenConfigurationCorrection(result.corrections,
+        warden::WardenConfigurationCorrection::Thresholds));
+}
+
 TEST(WardenConfiguration_zero_window_falls_back_without_changing_thresholds)
 {
     auto raw = ValidCustomConfiguration();

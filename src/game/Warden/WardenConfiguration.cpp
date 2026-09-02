@@ -32,10 +32,10 @@ namespace
 uint32 constexpr MaxPlannerSeconds =
     std::numeric_limits<uint32>::max() / uint32(1000);
 
-bool IsValidInterval(uint32 minimum, uint32 maximum)
+bool IsValidInterval(int32 minimum, int32 maximum)
 {
     return minimum > 0 && minimum <= maximum &&
-        maximum <= MaxPlannerSeconds;
+        static_cast<uint32>(maximum) <= MaxPlannerSeconds;
 }
 
 void AddCorrection(warden::WardenConfigurationCorrection& corrections,
@@ -57,7 +57,8 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
     result.value.requireExactProfile = raw.requireExactProfile;
     result.value.requireCurrentX86Patch = raw.requireCurrentX86Patch;
 
-    if (raw.enforcementMode <=
+    if (raw.enforcementMode >= 0 &&
+        static_cast<uint32>(raw.enforcementMode) <=
         static_cast<uint32>(WardenEnforcementMode::KickAndBan))
     {
         result.value.enforcementMode =
@@ -71,8 +72,8 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
 
     if (IsValidInterval(raw.normalMinSeconds, raw.normalMaxSeconds))
     {
-        result.value.normalMinSeconds = raw.normalMinSeconds;
-        result.value.normalMaxSeconds = raw.normalMaxSeconds;
+        result.value.normalMinSeconds = static_cast<uint32>(raw.normalMinSeconds);
+        result.value.normalMaxSeconds = static_cast<uint32>(raw.normalMaxSeconds);
     }
     else
     {
@@ -83,8 +84,8 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
     if (IsValidInterval(raw.aggressiveMinSeconds,
         raw.aggressiveMaxSeconds))
     {
-        result.value.aggressiveMinSeconds = raw.aggressiveMinSeconds;
-        result.value.aggressiveMaxSeconds = raw.aggressiveMaxSeconds;
+        result.value.aggressiveMinSeconds = static_cast<uint32>(raw.aggressiveMinSeconds);
+        result.value.aggressiveMaxSeconds = static_cast<uint32>(raw.aggressiveMaxSeconds);
     }
     else
     {
@@ -97,8 +98,8 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
     if (raw.aggressiveThreshold > 0 &&
         raw.aggressiveThreshold < raw.banThreshold)
     {
-        result.value.aggressiveThreshold = raw.aggressiveThreshold;
-        result.value.banThreshold = raw.banThreshold;
+        result.value.aggressiveThreshold = static_cast<uint32>(raw.aggressiveThreshold);
+        result.value.banThreshold = static_cast<uint32>(raw.banThreshold);
     }
     else
     {
@@ -106,8 +107,10 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
             WardenConfigurationCorrection::Thresholds);
     }
 
-    if (IsValidWardenIncidentWindow(raw.incidentWindowSeconds))
-        result.value.incidentWindowSeconds = raw.incidentWindowSeconds;
+    if (raw.incidentWindowSeconds > 0 && IsValidWardenIncidentWindow(
+            static_cast<uint32>(raw.incidentWindowSeconds)))
+        result.value.incidentWindowSeconds =
+            static_cast<uint32>(raw.incidentWindowSeconds);
     else
         AddCorrection(result.corrections,
             WardenConfigurationCorrection::IncidentWindow);

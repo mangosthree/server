@@ -141,26 +141,26 @@ bool World::LoadConfigSettings(bool reload)
     // safety gate. Validate and atomically publish it before changing any
     // cached World setting, so a rejected reload preserves the prior state.
     warden::WardenRawConfiguration rawWarden;
-    rawWarden.enforcementMode = static_cast<uint32>(config->GetIntDefault(
-        "Warden.EnforcementMode", 0));
+    rawWarden.enforcementMode = config->GetIntDefault(
+        "Warden.EnforcementMode", 0);
     rawWarden.requireExactProfile = config->GetBoolDefault(
         "Warden.RequireExactProfile", true);
     rawWarden.requireCurrentX86Patch = config->GetBoolDefault(
         "Warden.RequireCurrentX86Patch", true);
-    rawWarden.normalMinSeconds = static_cast<uint32>(config->GetIntDefault(
-        "Warden.CheckIntervalMin", 30));
-    rawWarden.normalMaxSeconds = static_cast<uint32>(config->GetIntDefault(
-        "Warden.CheckIntervalMax", 60));
-    rawWarden.aggressiveMinSeconds = static_cast<uint32>(
-        config->GetIntDefault("Warden.AggressiveIntervalMin", 10));
-    rawWarden.aggressiveMaxSeconds = static_cast<uint32>(
-        config->GetIntDefault("Warden.AggressiveIntervalMax", 20));
-    rawWarden.aggressiveThreshold = static_cast<uint32>(config->GetIntDefault(
-        "Warden.AggressiveThreshold", 5));
-    rawWarden.banThreshold = static_cast<uint32>(config->GetIntDefault(
-        "Warden.BanThreshold", 10));
-    rawWarden.incidentWindowSeconds = static_cast<uint32>(
-        config->GetIntDefault("Warden.IncidentWindow", 900));
+    rawWarden.normalMinSeconds = config->GetIntDefault(
+        "Warden.CheckIntervalMin", 30);
+    rawWarden.normalMaxSeconds = config->GetIntDefault(
+        "Warden.CheckIntervalMax", 60);
+    rawWarden.aggressiveMinSeconds = config->GetIntDefault(
+        "Warden.AggressiveIntervalMin", 10);
+    rawWarden.aggressiveMaxSeconds = config->GetIntDefault(
+        "Warden.AggressiveIntervalMax", 20);
+    rawWarden.aggressiveThreshold = config->GetIntDefault(
+        "Warden.AggressiveThreshold", 5);
+    rawWarden.banThreshold = config->GetIntDefault(
+        "Warden.BanThreshold", 10);
+    rawWarden.incidentWindowSeconds = config->GetIntDefault(
+        "Warden.IncidentWindow", 900);
 
     warden::WardenConfigurationNormalization const normalizedWarden =
         warden::NormalizeWardenConfiguration(rawWarden);

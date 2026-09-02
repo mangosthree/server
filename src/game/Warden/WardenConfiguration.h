@@ -55,20 +55,20 @@ struct WardenRawConfiguration
 {
     // Both compiled Cata modules remain StaticVerified, so the only safe
     // missing-key/default policy is observe-only until G4 promotes them.
-    uint32 enforcementMode = 0;
+    int32 enforcementMode = 0;
     // When false, missing/unsupported profiles and protocol lifecycle failures
     // disengage Warden for the session instead of enforcing admission.
     bool requireExactProfile = true;
     // Require a verified x86 profile before any unsafe archive callback can be
     // selected. This is compatibility policy, not evidence.
     bool requireCurrentX86Patch = true;
-    uint32 normalMinSeconds = 30;
-    uint32 normalMaxSeconds = 60;
-    uint32 aggressiveMinSeconds = 10;
-    uint32 aggressiveMaxSeconds = 20;
-    uint32 aggressiveThreshold = 5;
-    uint32 banThreshold = 10;
-    uint32 incidentWindowSeconds = 900;
+    int32 normalMinSeconds = 30;
+    int32 normalMaxSeconds = 60;
+    int32 aggressiveMinSeconds = 10;
+    int32 aggressiveMaxSeconds = 20;
+    int32 aggressiveThreshold = 5;
+    int32 banThreshold = 10;
+    int32 incidentWindowSeconds = 900;
 };
 
 /** Values safe for planners and enforcement policy to consume. */

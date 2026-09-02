@@ -26,6 +26,7 @@
 #include "MotionDriver.h"
 #include "ObjectLookup.h"
 #include "Unit.h"
+#include "WaypointSmoothing.h"
 #include "movement/MoveSpline.h"
 #include "movement/MoveSplineInit.h"
 
@@ -191,6 +192,16 @@ bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
         // nowhere and re-lay itself from the same spot every tick.
         if (!routed || (intent.Has(Motion::MOVE_REQUIRE_PATH) && query->Failed()) ||
             (query->Partial() && !query->Progresses()))
+        {
+            m_blocked = true;
+            return false;
+        }
+
+        // Waypoint smoothing may reject a generated leg and deliberately fall
+        // back through this general router. Apply the same packed-wire guard to
+        // that routed geometry so the fallback cannot recreate the collapsed
+        // client-side segment that was just rejected.
+        if (!IsWaypointSmoothingWireSafe(query->Points(), start))
         {
             m_blocked = true;
             return false;

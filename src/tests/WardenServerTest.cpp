@@ -523,6 +523,20 @@ warden::WardenCheckCatalog BuildSyntheticMpqCheckCatalog()
     return BuildCatalog(rows);
 }
 
+warden::WardenCheckCatalog BuildInitialOnlyCheckCatalog()
+{
+    std::vector<warden::WardenCheckRowInput> rows =
+        warden::test::CompleteSyntheticRows();
+    std::string const unclassified =
+        warden::test::VariantHex(warden::ClientVariant::Unclassified);
+    for (warden::WardenCheckRowInput& row : rows)
+    {
+        if (row.variantHex != unclassified)
+            row.phaseMask = warden::PhaseInitial;
+    }
+    return BuildCatalog(rows);
+}
+
 warden::WardenCheckCatalog BuildProductionShapedX86Catalog()
 {
     std::vector<warden::WardenCheckRowInput> rows =
@@ -773,6 +787,9 @@ TEST(WardenServer_x86_profile_probe_timeout_remains_an_operational_failure)
     REQUIRE(!x86.ReadServer().empty());
 
     x86.server->Update(false, 30000);
+    CHECK(x86.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    x86.server->Update(false, 0);
     CHECK(x86.server->GetState() == warden::WardenState::Failed);
     CHECK(x86.server->GetFailure() ==
         warden::WardenFailure::DeadlineExpired);
@@ -785,6 +802,9 @@ TEST(WardenServer_x86_profile_probe_timeout_remains_an_operational_failure)
     REQUIRE(!x64.ReadServer().empty());
 
     x64.server->Update(false, 30000);
+    CHECK(x64.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    x64.server->Update(false, 0);
     CHECK(x64.server->GetState() == warden::WardenState::Failed);
     CHECK(x64.server->GetFailure() ==
         warden::WardenFailure::DeadlineExpired);
@@ -799,6 +819,9 @@ TEST(WardenServer_x86_profile_probe_timeout_remains_an_operational_failure)
     REQUIRE(!optionalX86.ReadServer().empty());
 
     optionalX86.server->Update(false, 30000);
+    CHECK(optionalX86.server->GetState() ==
+        warden::WardenState::ProfileProbeSent);
+    optionalX86.server->Update(false, 0);
     CHECK(optionalX86.server->GetState() == warden::WardenState::Failed);
     CHECK(optionalX86.server->GetFailure() ==
         warden::WardenFailure::DeadlineExpired);
@@ -1289,6 +1312,9 @@ TEST(WardenServer_wrong_state_module_failure_bad_hash_and_timeout_are_operationa
     Harness timeout;
     REQUIRE(timeout.server->Start());
     timeout.server->Update(false, std::numeric_limits<uint32>::max());
+    CHECK(timeout.server->GetState() ==
+        warden::WardenState::ArchitectureChallengeSent);
+    timeout.server->Update(false, 0);
     CHECK(timeout.server->GetState() == warden::WardenState::Failed);
     CHECK(timeout.evidence.empty());
 }
@@ -1372,6 +1398,40 @@ TEST(WardenServer_confirmation_and_aggressive_controls_forward_exact_plan_purpos
     REQUIRE(plan);
     CHECK(plan->purpose == warden::CheckPlanPurpose::AggressiveImmediate);
     CHECK(!plan->checks.empty());
+}
+
+TEST(WardenServer_empty_optional_plans_are_rescheduled_without_failure)
+{
+    auto checks = std::make_shared<warden::WardenCheckCatalog const>(
+        BuildInitialOnlyCheckCatalog());
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        std::move(checks));
+    REQUIRE(harness.ReachHealthy(warden::WardenArchitecture::X86));
+
+    harness.server->Update(true, 1000);
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+    CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server));
+
+    harness.server->SetAggressive(true);
+    harness.server->Update(true, 0);
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+    CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server));
+}
+
+TEST(WardenServer_expired_aggressive_mode_cancels_queued_immediate_plan)
+{
+    Harness harness;
+    REQUIRE(harness.ReachHealthy(warden::WardenArchitecture::X86));
+
+    harness.server->SetAggressive(true);
+    harness.server->SetAggressive(false);
+    harness.server->Update(true, 0);
+
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+    CHECK(!warden::WardenServerTestAccess::PendingCheckPlan(
+        *harness.server));
 }
 
 TEST(WardenServer_queues_multiple_confirmations_serially)

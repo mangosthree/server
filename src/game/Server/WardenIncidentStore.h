@@ -154,8 +154,8 @@ inline WardenIncidentWindowState ClassifyIncidentWindow(
     recent.reserve(timestamps.size());
     for (uint64 timestamp : timestamps)
     {
-        if (now < incidentWindowSeconds ||
-            timestamp > now - incidentWindowSeconds)
+        if (timestamp <= now && (now < incidentWindowSeconds ||
+                timestamp > now - incidentWindowSeconds))
         {
             recent.push_back(timestamp);
         }

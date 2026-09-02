@@ -873,8 +873,21 @@ bool WardenServer::BuildPendingPlan(CheckPlanPurpose purpose,
     if (!m_module || !m_checkXorKey || !m_planner || m_pendingPlan)
         return false;
     CheckPlan plan;
-    if (m_planner->Build(purpose, m_nextRequestId, plan,
-            confirmationCheckId) != CheckPlanValidation::Valid)
+    CheckPlanValidation const validation = m_planner->Build(
+        purpose, m_nextRequestId, plan, confirmationCheckId);
+    if (validation == CheckPlanValidation::EmptyPlan &&
+        (purpose == CheckPlanPurpose::Recurring ||
+            purpose == CheckPlanPurpose::AggressiveImmediate ||
+            purpose == CheckPlanPurpose::AggressiveRecurring))
+    {
+        // Catalogue publication explicitly permits optional phases to be
+        // empty. Treat them as a scheduled no-op instead of converting a valid
+        // operator choice into a client protocol failure.
+        if (!SelectScheduleMilliseconds(m_remainingScheduleMs))
+            Fail(WardenFailure::CryptoFailure);
+        return m_state != WardenState::Failed;
+    }
+    if (validation != CheckPlanValidation::Valid)
     {
         return false;
     }
@@ -1136,10 +1149,18 @@ void WardenServer::Update(bool scanEligible, uint32 diffMs)
         return;
     if (HasChargedDeadline())
     {
-        if (diffMs >= m_remainingDeadlineMs)
+        if (!m_remainingDeadlineMs)
         {
             Fail(ClassifyClientProfileFailure(
                 WardenFailure::DeadlineExpired));
+            return;
+        }
+        if (diffMs >= m_remainingDeadlineMs)
+        {
+            // Packet dispatch follows this update in the same world tick. Give
+            // an already-queued reply that one dispatch opportunity before a
+            // zero deadline becomes terminal on the next tick.
+            m_remainingDeadlineMs = 0;
             return;
         }
         m_remainingDeadlineMs -= diffMs;
@@ -1235,6 +1256,8 @@ void WardenServer::SetAggressive(bool aggressive)
         return;
     if (aggressive && !m_aggressive)
         m_aggressiveImmediatePending = true;
+    else if (!aggressive)
+        m_aggressiveImmediatePending = false;
     m_aggressive = aggressive;
     if (!SelectScheduleMilliseconds(m_remainingScheduleMs))
         Fail(WardenFailure::CryptoFailure);

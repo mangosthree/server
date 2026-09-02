@@ -101,6 +101,14 @@ TEST(WardenIncidentWindow_uses_exclusive_boundary_and_threshold_timestamp)
     CHECK_EQ(warden::RebaseIncidentDeadline(120, 100, maximum - 5), maximum);
 }
 
+TEST(WardenIncidentWindow_excludes_timestamps_after_database_now)
+{
+    warden::WardenIncidentWindowState const state =
+        warden::ClassifyIncidentWindow({101, 110, 111, 120}, 110, 10, 2);
+    CHECK_EQ(state.recentCount, uint32(2));
+    CHECK_EQ(state.aggressiveUntil, uint64(111));
+}
+
 TEST(WardenIncidentWriteResult_never_manufactures_durable_summary)
 {
     warden::WardenIncidentWriteResult failed;

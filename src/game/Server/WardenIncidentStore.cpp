@@ -78,6 +78,7 @@ std::optional<WardenIncidentWindowState> WardenIncidentStore::Load(
         "SELECT `occurred_at` FROM `warden_incident` "
         "WHERE `account_id` = %u "
         "AND `occurred_at` > UNIX_TIMESTAMP() - %u "
+        "AND `occurred_at` <= UNIX_TIMESTAMP() "
         "UNION ALL SELECT NULL AS `occurred_at`"
         ") AS `recent` "
         "ORDER BY `recent`.`occurred_at` IS NULL, "
@@ -172,7 +173,8 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
             "JOIN (SELECT `recent_count` FROM ("
             "SELECT COUNT(*) AS `recent_count` FROM `warden_incident` "
             "WHERE `account_id` = %u "
-            "AND `occurred_at` > UNIX_TIMESTAMP() - %u"
+            "AND `occurred_at` > UNIX_TIMESTAMP() - %u "
+            "AND `occurred_at` <= UNIX_TIMESTAMP()"
             ") AS `materialized_count`) AS `recent` "
             "SET `wi`.`ban_triggered` = 1 "
             "WHERE `wi`.`incident_id` = LAST_INSERT_ID() "
@@ -227,7 +229,8 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
             ") AS `permanent_ban_active` "
             "FROM `warden_incident` "
             "WHERE `account_id` = %u "
-            "AND `occurred_at` > UNIX_TIMESTAMP() - %u",
+            "AND `occurred_at` > UNIX_TIMESTAMP() - %u "
+            "AND `occurred_at` <= UNIX_TIMESTAMP()",
             context.accountId, context.accountId,
             configuration.incidentWindowSeconds))
         {

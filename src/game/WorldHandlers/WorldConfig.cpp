@@ -24,6 +24,7 @@
  */
 
 #include <cmath>
+#include <optional>
 #include <string>
 #include "World.h"
 #include "Database/DatabaseEnv.h"
@@ -100,17 +101,21 @@
 /// Initialize config values
 bool World::LoadConfigSettings(bool reload)
 {
+    std::optional<Config> stagedConfig;
+    Config* config = &sConfig;
     if (reload)
     {
-        if (!sConfig.Reload())
+        stagedConfig.emplace();
+        if (!stagedConfig->SetSource(sConfig.GetFilename().c_str()))
         {
             sLog.outError("World settings reload fail: can't read settings from %s.", sConfig.GetFilename().c_str());
             return false;
         }
+        config = &*stagedConfig;
     }
 
     ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
-    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    uint32 confVersion = config->GetIntDefault("ConfVersion", 0);
     if (!confVersion)
     {
         sLog.outError("*****************************************************************************");
@@ -136,26 +141,26 @@ bool World::LoadConfigSettings(bool reload)
     // safety gate. Validate and atomically publish it before changing any
     // cached World setting, so a rejected reload preserves the prior state.
     warden::WardenRawConfiguration rawWarden;
-    rawWarden.enforcementMode = static_cast<uint32>(sConfig.GetIntDefault(
+    rawWarden.enforcementMode = static_cast<uint32>(config->GetIntDefault(
         "Warden.EnforcementMode", 0));
-    rawWarden.requireExactProfile = sConfig.GetBoolDefault(
+    rawWarden.requireExactProfile = config->GetBoolDefault(
         "Warden.RequireExactProfile", true);
-    rawWarden.requireCurrentX86Patch = sConfig.GetBoolDefault(
+    rawWarden.requireCurrentX86Patch = config->GetBoolDefault(
         "Warden.RequireCurrentX86Patch", true);
-    rawWarden.normalMinSeconds = static_cast<uint32>(sConfig.GetIntDefault(
+    rawWarden.normalMinSeconds = static_cast<uint32>(config->GetIntDefault(
         "Warden.CheckIntervalMin", 30));
-    rawWarden.normalMaxSeconds = static_cast<uint32>(sConfig.GetIntDefault(
+    rawWarden.normalMaxSeconds = static_cast<uint32>(config->GetIntDefault(
         "Warden.CheckIntervalMax", 60));
     rawWarden.aggressiveMinSeconds = static_cast<uint32>(
-        sConfig.GetIntDefault("Warden.AggressiveIntervalMin", 10));
+        config->GetIntDefault("Warden.AggressiveIntervalMin", 10));
     rawWarden.aggressiveMaxSeconds = static_cast<uint32>(
-        sConfig.GetIntDefault("Warden.AggressiveIntervalMax", 20));
-    rawWarden.aggressiveThreshold = static_cast<uint32>(sConfig.GetIntDefault(
+        config->GetIntDefault("Warden.AggressiveIntervalMax", 20));
+    rawWarden.aggressiveThreshold = static_cast<uint32>(config->GetIntDefault(
         "Warden.AggressiveThreshold", 5));
-    rawWarden.banThreshold = static_cast<uint32>(sConfig.GetIntDefault(
+    rawWarden.banThreshold = static_cast<uint32>(config->GetIntDefault(
         "Warden.BanThreshold", 10));
     rawWarden.incidentWindowSeconds = static_cast<uint32>(
-        sConfig.GetIntDefault("Warden.IncidentWindow", 900));
+        config->GetIntDefault("Warden.IncidentWindow", 900));
 
     warden::WardenConfigurationNormalization const normalizedWarden =
         warden::NormalizeWardenConfiguration(rawWarden);
@@ -193,6 +198,12 @@ bool World::LoadConfigSettings(bool reload)
         sLog.outError("Warden runtime configuration publication failed.");
         return false;
     }
+
+    // Only publish the parsed global configuration after the Warden runtime
+    // accepts the same candidate. A rejected reload therefore cannot leak a
+    // partially applied sConfig view to commands that read it directly.
+    if (stagedConfig)
+        sConfig = *stagedConfig;
 
     m_configUint32Values[CONFIG_UINT32_WARDEN_ENFORCEMENT_MODE] =
         uint32(normalizedWarden.value.enforcementMode);

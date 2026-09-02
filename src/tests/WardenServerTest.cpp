@@ -763,7 +763,7 @@ TEST(WardenServer_x86_legacy_patch_requirement_fails_before_filesystem_or_mpq)
     CHECK(harness.evidence.empty());
 }
 
-TEST(WardenServer_x86_required_patch_profile_probe_timeout_is_compatibility_rejection)
+TEST(WardenServer_x86_profile_probe_timeout_remains_an_operational_failure)
 {
     Harness x86;
     REQUIRE(x86.ReachReadyForWorld(warden::WardenArchitecture::X86));
@@ -775,7 +775,7 @@ TEST(WardenServer_x86_required_patch_profile_probe_timeout_is_compatibility_reje
     x86.server->Update(false, 30000);
     CHECK(x86.server->GetState() == warden::WardenState::Failed);
     CHECK(x86.server->GetFailure() ==
-        warden::WardenFailure::ClientPatchRequired);
+        warden::WardenFailure::DeadlineExpired);
 
     Harness x64;
     REQUIRE(x64.ReachReadyForWorld(warden::WardenArchitecture::X64));
@@ -914,7 +914,7 @@ TEST(WardenServer_x86_unrecognized_adapter_requires_current_patch_without_filesy
     CHECK(optional.evidence.empty());
 }
 
-TEST(WardenServer_x86_malformed_profile_probe_requires_current_patch)
+TEST(WardenServer_x86_malformed_profile_probe_remains_a_payload_failure)
 {
     Harness harness;
     REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
@@ -932,7 +932,7 @@ TEST(WardenServer_x86_malformed_profile_probe_requires_current_patch)
 
     CHECK(harness.server->GetState() == warden::WardenState::Failed);
     CHECK(harness.server->GetFailure() ==
-        warden::WardenFailure::ClientPatchRequired);
+        warden::WardenFailure::MalformedPayload);
     CHECK(harness.evidence.empty());
 }
 
@@ -1372,6 +1372,58 @@ TEST(WardenServer_confirmation_and_aggressive_controls_forward_exact_plan_purpos
     REQUIRE(plan);
     CHECK(plan->purpose == warden::CheckPlanPurpose::AggressiveImmediate);
     CHECK(!plan->checks.empty());
+}
+
+TEST(WardenServer_queues_multiple_confirmations_serially)
+{
+    std::vector<warden::WardenCheckRowInput> rows =
+        warden::test::CompleteSyntheticRows();
+    warden::WardenCheckRowInput second = warden::test::MakeRow(
+        warden::WardenArchitecture::X86, warden::ClientVariant::Stock,
+        2005, warden::WardenCheckType::Mem, 40,
+        warden::WardenEvidenceClass::IntegrityInvariant,
+        warden::PhaseRecurring, warden::WardenAddressKind::AbsoluteVa);
+    second.address = 0x00402000;
+    second.length = 4;
+    second.expectedHex = "CCCCCCCC";
+    rows.push_back(second);
+
+    warden::WardenCheckCatalogBuilder builder;
+    warden::WardenCheckDiagnostic diagnostic;
+    for (warden::WardenCheckRowInput const& row : rows)
+        REQUIRE(builder.Add(row, diagnostic) ==
+            warden::CheckCatalogValidation::Valid);
+    warden::WardenCheckCatalog catalog;
+    REQUIRE(builder.Build(catalog, diagnostic) ==
+        warden::CheckCatalogValidation::Valid);
+    auto checks = std::make_shared<warden::WardenCheckCatalog const>(
+        std::move(catalog));
+
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        std::move(checks));
+    REQUIRE(harness.ReachHealthy(warden::WardenArchitecture::X86));
+    REQUIRE(harness.server->QueueConfirmation(2002));
+    REQUIRE(harness.server->QueueConfirmation(2005));
+
+    harness.server->Update(true, 0);
+    std::optional<warden::CheckPlan> first =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(first);
+    REQUIRE(first->purpose == warden::CheckPlanPurpose::Confirmation);
+    REQUIRE(first->checks.size() == 1u);
+    CHECK_EQ(warden::GetWardenCheckId(first->checks[0]), uint32(2002));
+
+    warden::WardenEvidenceBatch firstResult = Harness::CleanBatch(*first);
+    warden::WardenServerTestAccess::CompleteSyntheticEvidenceBatch(
+        *harness.server, std::move(firstResult));
+    harness.server->Update(true, 0);
+
+    std::optional<warden::CheckPlan> secondPlan =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(secondPlan);
+    REQUIRE(secondPlan->purpose == warden::CheckPlanPurpose::Confirmation);
+    REQUIRE(secondPlan->checks.size() == 1u);
+    CHECK_EQ(warden::GetWardenCheckId(secondPlan->checks[0]), uint32(2005));
 }
 
 TEST(WardenServer_second_recurring_plan_receives_a_fresh_deadline)

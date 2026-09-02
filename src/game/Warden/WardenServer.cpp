@@ -335,7 +335,11 @@ bool WardenServer::HasChargedDeadline() const
 WardenFailure WardenServer::ClassifyClientProfileFailure(
     WardenFailure failure) const
 {
-    if (m_state == WardenState::ProfileProbeSent &&
+    // Only a complete but unrecognized x86 fingerprint says the installed
+    // patch is unsupported. Transport, crypto, framing and deadline failures
+    // retain their operational cause and must never masquerade as patch proof.
+    if (failure == WardenFailure::ProfileUnclassified &&
+        m_state == WardenState::ProfileProbeSent &&
         m_architecture == WardenArchitecture::X86 &&
         m_configuration.requireCurrentX86Patch)
     {
@@ -1166,10 +1170,10 @@ void WardenServer::Update(bool scanEligible, uint32 diffMs)
         return;
     }
 
-    if (m_confirmationCheckId)
+    if (!m_confirmationCheckIds.empty())
     {
-        uint32 const checkId = m_confirmationCheckId;
-        m_confirmationCheckId = 0;
+        uint32 const checkId = m_confirmationCheckIds.front();
+        m_confirmationCheckIds.pop_front();
         if (!BuildPendingPlan(CheckPlanPurpose::Confirmation, checkId))
             Fail(WardenFailure::UnexpectedCommand);
         return;
@@ -1198,7 +1202,7 @@ bool WardenServer::QueueConfirmation(uint32 checkId)
 {
     if (m_inSendCallback)
         return false;
-    if (!checkId || !m_planner || m_pendingPlan || m_confirmationCheckId ||
+    if (!checkId || !m_planner || m_pendingPlan ||
         (m_state != WardenState::Healthy &&
             m_state != WardenState::Recurring))
     {
@@ -1210,7 +1214,16 @@ bool WardenServer::QueueConfirmation(uint32 checkId)
     {
         return false;
     }
-    m_confirmationCheckId = checkId;
+    if (std::find(m_confirmationCheckIds.begin(),
+            m_confirmationCheckIds.end(), checkId) !=
+        m_confirmationCheckIds.end())
+    {
+        return false;
+    }
+    // Confirmation plans remain one-check wire transactions. Queueing only
+    // serializes multiple decisions from one evidence batch; it never merges
+    // their independent identity or result contracts.
+    m_confirmationCheckIds.push_back(checkId);
     return true;
 }
 

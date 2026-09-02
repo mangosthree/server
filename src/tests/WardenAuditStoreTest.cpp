@@ -37,6 +37,7 @@ warden::WardenAuditContext ValidAudit()
     context.accountId = 6;
     context.realmId = 1;
     context.clientBuild = 15595;
+    context.clientPlatform = "Win";
     context.architecture = warden::WardenArchitecture::X86;
     context.locale = {{'e', 'n', 'U', 'S'}};
     context.variant = warden::ClientVariant::Stock;
@@ -76,6 +77,8 @@ TEST(WardenAuditContext_accepts_exact_check_and_operational_identities)
     context.evidenceClass = warden::WardenEvidenceClass::ProtocolHealth;
     context.outcome = warden::WardenAuditOutcome::Unavailable;
     CHECK(warden::IsValidWardenAuditContext(context));
+    context.clientPlatform = "OSX";
+    CHECK(warden::IsValidWardenAuditContext(context));
 
     context.architecture = warden::WardenArchitecture::X64;
     context.locale = {{'z', 'z', 'Z', 'Z'}};
@@ -88,6 +91,12 @@ TEST(WardenAuditContext_rejects_unproven_check_identity_and_bad_shapes)
     warden::WardenAuditContext context = ValidAudit();
     context.variant = warden::ClientVariant::LegacyGrunt;
     context.architecture = warden::WardenArchitecture::X64;
+    CHECK(!warden::IsValidWardenAuditContext(context));
+    context = ValidAudit();
+    context.clientPlatform = "OSX";
+    CHECK(!warden::IsValidWardenAuditContext(context));
+    context = ValidAudit();
+    context.clientPlatform.clear();
     CHECK(!warden::IsValidWardenAuditContext(context));
     context = ValidAudit();
     context.locale = {{'z', 'z', 'Z', 'Z'}};

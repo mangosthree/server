@@ -30,6 +30,7 @@
 
 #include <array>
 #include <optional>
+#include <string>
 
 namespace warden
 {
@@ -46,6 +47,7 @@ struct WardenAuditContext
     uint32 accountId = 0;
     uint32 realmId = 0;
     uint32 clientBuild = 0;
+    std::string clientPlatform;
     WardenArchitecture architecture = WardenArchitecture::Unclassified;
     std::array<char, 4> locale{};
     ClientVariant variant = ClientVariant::Unclassified;
@@ -70,14 +72,18 @@ inline bool IsValidWardenAuditContext(WardenAuditContext const& context)
     bool const knownArchitecture =
         ToPersistenceToken(context.architecture) != nullptr;
     bool const knownVariant = ToPersistenceToken(context.variant) != nullptr;
+    bool const knownPlatform = context.clientPlatform == "Win" ||
+        context.clientPlatform == "OSX";
     std::array<char, 4> const unknownLocale = {{'u', 'n', 'k', 'n'}};
-    bool const operational = context.checkId == 0 && knownArchitecture &&
-        knownVariant && (context.locale == unknownLocale ||
+    bool const operational = context.checkId == 0 && knownPlatform &&
+        knownArchitecture && knownVariant &&
+        (context.locale == unknownLocale ||
             IsCanonicalLocaleClaim(context.locale)) &&
         context.checkType == WardenCheckType::Timing &&
         context.evidenceClass == WardenEvidenceClass::ProtocolHealth &&
         context.outcome == WardenAuditOutcome::Unavailable;
     bool const checkEvidence = context.checkId != 0 &&
+        context.clientPlatform == "Win" &&
         (context.architecture == WardenArchitecture::X86 ||
             context.architecture == WardenArchitecture::X64) &&
         IsPublishedCataWardenLocale(context.locale) &&

@@ -701,6 +701,7 @@ void WorldSession::PersistWardenAudit(
     context.accountId = GetAccountId();
     context.realmId = realmID;
     context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientOs;
     context.architecture = m_wardenArchitecture;
     context.locale = m_wardenLocale;
     context.variant = m_wardenVariant;
@@ -727,6 +728,7 @@ void WorldSession::PersistWardenOperationalAudit(
     context.accountId = GetAccountId();
     context.realmId = realmID;
     context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientOs;
     context.architecture = m_wardenArchitecture;
     context.locale = m_wardenLocale;
     context.variant = m_wardenVariant;
@@ -751,6 +753,7 @@ void WorldSession::PersistWardenAdmissionAudit(
     context.accountId = GetAccountId();
     context.realmId = realmID;
     context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientOs;
     context.architecture = warden::WardenArchitecture::Unclassified;
     context.locale = m_wardenLocale;
     context.variant = warden::ClientVariant::Unclassified;
@@ -782,6 +785,7 @@ void WorldSession::PersistWardenIncidentAndKick(
     context.accountId = GetAccountId();
     context.realmId = realmID;
     context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientOs;
     context.architecture = m_wardenArchitecture;
     context.locale = m_wardenLocale;
     context.variant = m_wardenVariant;

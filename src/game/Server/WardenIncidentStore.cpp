@@ -133,9 +133,11 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
     if (!architecture || !variant)
         return failed;
 
+    std::string safePlatform(context.clientPlatform);
     std::string safeArchitecture(architecture);
     std::string safeLocale(context.locale.begin(), context.locale.end());
     std::string safeVariant(variant);
+    LoginDatabase.escape_string(safePlatform);
     LoginDatabase.escape_string(safeArchitecture);
     LoginDatabase.escape_string(safeLocale);
     LoginDatabase.escape_string(safeVariant);
@@ -152,11 +154,13 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
     queued = queued && LoginDatabase.PExecute(
         "INSERT INTO `warden_incident` "
         "(`account_id`,`occurred_at`,`realm_id`,`client_build`,"
-        "`client_platform`,`client_locale`,`client_variant`,`check_id`,"
+        "`client_platform`,`client_architecture`,`client_locale`,"
+        "`client_variant`,`check_id`,"
         "`check_type`,`evidence_class`,`outcome`,`ban_triggered`) "
-        "VALUES (%u,UNIX_TIMESTAMP(),%u,%u,'%s','%s','%s',%u,%u,%u,%u,0)",
+        "VALUES (%u,UNIX_TIMESTAMP(),%u,%u,'%s','%s','%s','%s',%u,%u,%u,%u,0)",
         context.accountId, context.realmId, context.clientBuild,
-        safeArchitecture.c_str(), safeLocale.c_str(), safeVariant.c_str(),
+        safePlatform.c_str(), safeArchitecture.c_str(), safeLocale.c_str(),
+        safeVariant.c_str(),
         context.checkId, uint32(context.checkType),
         uint32(context.evidenceClass), uint32(context.outcome));
 

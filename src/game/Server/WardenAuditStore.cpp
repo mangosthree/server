@@ -50,20 +50,24 @@ bool WardenAuditStore::Record(WardenAuditContext const& context) const
     // Copy every value before the asynchronous statement is queued. Enum
     // tokens are fixed vocabulary and the locale has already passed the
     // exact four-byte identity validator; escaping remains defense in depth.
+    std::string safePlatform(context.clientPlatform);
     std::string safeArchitecture(architecture);
     std::string safeLocale(context.locale.begin(), context.locale.end());
     std::string safeVariant(variant);
+    LoginDatabase.escape_string(safePlatform);
     LoginDatabase.escape_string(safeArchitecture);
     LoginDatabase.escape_string(safeLocale);
     LoginDatabase.escape_string(safeVariant);
     return LoginDatabase.PExecute(
         "INSERT INTO `warden_audit` "
         "(`account_id`,`occurred_at`,`realm_id`,`client_build`,"
-        "`client_platform`,`client_locale`,`client_variant`,`check_id`,"
+        "`client_platform`,`client_architecture`,`client_locale`,"
+        "`client_variant`,`check_id`,"
         "`check_type`,`evidence_class`,`outcome`) "
-        "VALUES (%u,UNIX_TIMESTAMP(),%u,%u,'%s','%s','%s',%u,%u,%u,%u)",
+        "VALUES (%u,UNIX_TIMESTAMP(),%u,%u,'%s','%s','%s','%s',%u,%u,%u,%u)",
         context.accountId, context.realmId, context.clientBuild,
-        safeArchitecture.c_str(), safeLocale.c_str(), safeVariant.c_str(),
+        safePlatform.c_str(), safeArchitecture.c_str(), safeLocale.c_str(),
+        safeVariant.c_str(),
         context.checkId, uint32(context.checkType),
         uint32(context.evidenceClass), uint32(context.outcome));
 }

@@ -34,6 +34,7 @@
 #include <functional>
 #include <limits>
 #include <optional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -58,6 +59,7 @@ struct WardenIncidentContext
     uint32 accountId = 0;
     uint32 realmId = 0;
     uint32 clientBuild = 0;
+    std::string clientPlatform;
     WardenArchitecture architecture = WardenArchitecture::Unclassified;
     std::array<char, 4> locale{};
     ClientVariant variant = ClientVariant::Unclassified;
@@ -128,6 +130,7 @@ inline bool IsValidWardenIncidentContext(
     return context.accountId != 0 && context.realmId != 0 &&
         context.checkId != 0 &&
         context.clientBuild == 15595 &&
+        context.clientPlatform == "Win" &&
         (context.architecture == WardenArchitecture::X86 ||
             context.architecture == WardenArchitecture::X64) &&
         IsPublishedCataWardenLocale(context.locale) &&

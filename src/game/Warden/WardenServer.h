@@ -32,6 +32,7 @@
 #include "WardenModuleCatalog.h"
 #include "WardenPacketCodec.h"
 
+#include <deque>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -201,7 +202,7 @@ private:
     uint32 m_nextRequestId = 1;
     uint32 m_remainingDeadlineMs = 0;
     uint32 m_remainingScheduleMs = 0;
-    uint32 m_confirmationCheckId = 0;
+    std::deque<uint32> m_confirmationCheckIds;
     uint8 m_transferCount = 0;
     bool m_started = false;
     bool m_aggressive = false;

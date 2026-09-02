@@ -38,6 +38,7 @@ warden::WardenIncidentContext ValidIncident()
     context.accountId = 6;
     context.realmId = 1;
     context.clientBuild = 15595;
+    context.clientPlatform = "Win";
     context.architecture = warden::WardenArchitecture::X86;
     context.locale = {{'e', 'n', 'U', 'S'}};
     context.variant = warden::ClientVariant::Stock;
@@ -62,6 +63,12 @@ TEST(WardenIncidentContext_accepts_only_proven_actionable_profiles)
     context.variant = warden::ClientVariant::Grunt;
     CHECK(warden::IsValidWardenIncidentContext(context));
 
+    context = ValidIncident();
+    context.clientPlatform = "OSX";
+    CHECK(!warden::IsValidWardenIncidentContext(context));
+    context = ValidIncident();
+    context.clientPlatform.clear();
+    CHECK(!warden::IsValidWardenIncidentContext(context));
     context = ValidIncident();
     context.architecture = warden::WardenArchitecture::Unclassified;
     CHECK(!warden::IsValidWardenIncidentContext(context));

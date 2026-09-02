@@ -202,7 +202,8 @@ bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
         // the same live-spline/vehicle position Launch will put on the wire. Only
         // packed duplicate vertices are removed, preserving the routed corners.
         Movement::PointsArray routedPath = query->Points();
-        if (!SanitizeWaypointSmoothingWirePath(routedPath, init.ResolveLaunchPosition()))
+        if (!SanitizeWaypointSmoothingWirePath(
+                routedPath, Movement::MoveSplineInit::ResolveLaunchPosition(owner)))
         {
             m_blocked = true;
             return false;

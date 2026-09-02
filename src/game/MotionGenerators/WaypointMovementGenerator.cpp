@@ -365,10 +365,11 @@ void WaypointMovementGenerator::BuildSmoothPath(Creature& creature,
     Motion::IMotionFrame const& frame = Motion::FrameFor(creature);
     const std::unique_ptr<Motion::IPathQuery> query = frame.CreatePathQuery(creature);
 
-    // MoveSplineInit replaces the path's first routed point with this exact mover
-    // position before PacketBuilder derives the packed-path midpoint. Preserve it
-    // while the loop advances `start` through later waypoint legs.
-    const Motion::Vector3 launchPosition = frame.MoverPosition(creature);
+    // Resolve through the same side-effect-free selector Launch uses. A vehicle
+    // seat, live spline or pending stop can be authoritative over Where(), and
+    // the exact first wire point defines the packed-path quantization grid.
+    const Motion::Vector3 launchPosition =
+        Movement::MoveSplineInit::ResolveLaunchPosition(creature);
     Motion::Vector3 start = launchPosition;
 
     // Bounding box of the points committed so far. We keep extending the chunk through

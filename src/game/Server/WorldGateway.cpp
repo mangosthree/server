@@ -38,12 +38,17 @@
 #include "SharedDefines.h"
 #include "World.h"
 #include "WorldSession.h"
+#include "WorldGatewayAuth.h"
+#include "WardenIncidentStore.h"
+#include "WardenManager.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif
 
 #include <string>
+#include <ctime>
+#include <optional>
 
 namespace
 {
@@ -63,6 +68,8 @@ namespace
         time_t         muteTime  = 0;
         LocaleConstant locale    = LOCALE_enUS;
         BigNumber      sessionKey; ///< `sessionkey` column (K) -- arms proto's cipher and its SHA-1 proof.
+        std::string    os;
+        std::string    clientLocale;
 
         /// `s` column (SRP6 salt) -- WorldSocket kept this in a field it called
         /// m_s and exposed as GetSessionKey(), which SendRedirectClient() uses
@@ -135,7 +142,8 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
                              "`expansion`, "   // 6
                              "`mutetime`, "    // 7
                              "`locale`, "      // 8
-                             "`os` "           // 9
+                             "`os`, "          // 9
+                             "`client_locale` " // 10
                              "FROM `account` WHERE `username` = '%s'",
                              safeAccount.c_str());
 
@@ -149,32 +157,45 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
 
     std::shared_ptr<AccountRow> row = std::make_shared<AccountRow>();
 
-    row->id = fields[0].GetUInt32();
+    row->id = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::Id)].GetUInt32();
 
     // Clamp rather than trust: a bad gmlevel in the database must not hand out
     // more authority than the server has levels for. WorldSocket.cpp:1125-1128.
-    uint32 security = fields[1].GetUInt16();
+    uint32 security = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::Security)].GetUInt16();
     if (security > SEC_ADMINISTRATOR)
     {
         security = SEC_ADMINISTRATOR;
     }
     row->security = AccountTypes(security);
 
-    row->sessionKey.SetHexStr(fields[2].GetString());
+    row->sessionKey.SetHexStr(fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::SessionKey)].GetString());
 
-    const std::string lastIp = fields[3].GetString();
-    const bool        locked = fields[4].GetUInt8() == 1;
+    const std::string lastIp = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::LastIp)].GetCppString();
+    const bool locked = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::Locked)].GetUInt8() == 1;
 
-    row->sessionSalt.SetHexStr(fields[5].GetString());
+    row->sessionSalt.SetHexStr(fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::SessionSalt)].GetString());
 
     row->expansion = uint8(std::min<uint32>(sWorld.getConfig(CONFIG_UINT32_EXPANSION),
-                                            fields[6].GetUInt8()));
-    row->muteTime  = time_t(fields[7].GetUInt64());
+        fields[WorldGatewayAccountFieldIndex(
+            WorldGatewayAccountField::Expansion)].GetUInt8()));
+    row->muteTime = time_t(fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::MuteTime)].GetUInt64());
 
-    const uint8 rawLocale = fields[8].GetUInt8();
+    const uint8 rawLocale = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::DbcLocale)].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
-
-    const std::string clientOs = fields[9].GetString();
+    row->os = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::ClientOS)].GetCppString();
+    Field const& exactLocale = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::ClientLocale)];
+    if (!exactLocale.IsNULL())
+        row->clientLocale = exactLocale.GetCppString();
 
     delete queryResult;
 
@@ -222,10 +243,10 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
     // ---- Client platform -------------------------------------------------------
     // Preserve WorldSocket.cpp:1181-1191 as an authentication rule independent
     // of the retired Warden runtime.
-    if (clientOs != "Win" && clientOs != "OSX")
+    if (!IsSupportedAccountClientOS(row->os))
     {
         BASIC_LOG("WorldGateway: client %s attempted to log in using invalid "
-                  "client OS (%s)", request.peerAddress.c_str(), clientOs.c_str());
+                  "client OS (%s)", request.peerAddress.c_str(), row->os.c_str());
         result.status = proto::AuthStatus::Reject;
         return result;
     }
@@ -242,8 +263,9 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
 {
     EnsureDbThreadRegistered();
 
-    AccountRow* row = static_cast<AccountRow*>(context.get());
-    if (row == nullptr)
+    std::shared_ptr<AccountRow> row =
+        std::dynamic_pointer_cast<AccountRow>(context);
+    if (!link || !row)
     {
         return proto::INVALID_SESSION_ID;
     }
@@ -258,10 +280,51 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
 
     std::shared_ptr<SessionMailbox> mailbox =
         std::make_shared<SessionMailbox>();
+
+    warden::WardenAdmissionContext admissionContext;
+    admissionContext.runtimeSnapshot =
+        warden::WardenManager::Instance().GetRuntimeSnapshot();
+    if (!admissionContext.runtimeSnapshot)
+    {
+        sLog.outError("Warden runtime snapshot unavailable during authenticated "
+            "admission for account %u.", row->id);
+        link->Close();
+        return proto::INVALID_SESSION_ID;
+    }
+    // Queue residence may span a reload. Capture one generation now so its
+    // incident history and eventual session never mix two configurations.
+    admissionContext.configuration =
+        admissionContext.runtimeSnapshot->configuration;
+    if (admissionContext.configuration.enforcementMode !=
+        warden::WardenEnforcementMode::Observe)
+    {
+        std::optional<warden::WardenIncidentWindowState> const history =
+            warden::WardenIncidentStore::Instance().Load(row->id,
+                admissionContext.configuration.incidentWindowSeconds,
+                admissionContext.configuration.aggressiveThreshold);
+        if (history)
+        {
+            admissionContext.history.recentIncidentCount =
+                history->recentCount;
+            admissionContext.history.aggressiveUntilServer =
+                warden::RebaseIncidentDeadline(history->aggressiveUntil,
+                    history->databaseNow,
+                    static_cast<uint64>(std::time(nullptr)));
+            admissionContext.history.incidentHistoryLoaded = true;
+        }
+        else
+        {
+            sLog.outError("Warden incident history unavailable for "
+                "account %u; admission will use normal cadence.", row->id);
+        }
+    }
+    warden::AdmissionData admission = BuildWardenAdmissionData(request.build,
+        row->os, row->clientLocale, row->sessionKey);
     std::unique_ptr<WorldSession> session =
         std::make_unique<WorldSession>(
             row->id, link, mailbox, row->security, row->expansion,
-            row->muteTime, row->locale, row->sessionSalt);
+            row->muteTime, row->locale, row->sessionSalt,
+            std::move(admission), std::move(admissionContext));
 
     session->LoadGlobalAccountData();
     session->LoadTutorialsData();

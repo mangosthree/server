@@ -250,6 +250,15 @@ enum eConfigUInt32Values
 
     CONFIG_UINT32_LFG_DESERTER_MIN_REMAINING,
     CONFIG_UINT32_LFG_CALL_TO_ARMS_MIN_QUEUED,
+
+    CONFIG_UINT32_WARDEN_ENFORCEMENT_MODE,
+    CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MIN,
+    CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MAX,
+    CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MIN,
+    CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MAX,
+    CONFIG_UINT32_WARDEN_AGGRESSIVE_THRESHOLD,
+    CONFIG_UINT32_WARDEN_BAN_THRESHOLD,
+    CONFIG_UINT32_WARDEN_INCIDENT_WINDOW,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -427,9 +436,10 @@ enum eConfigBoolValues
     CONFIG_BOOL_LFG_ENABLE,
     CONFIG_BOOL_LFG_DESERTER_ON_VOTE_KICK,
     CONFIG_BOOL_LFG_CALL_TO_ARMS,
-
     // Movement arbiter
     CONFIG_BOOL_MOVEMENT_ARBITER_SHADOW,
+
+    CONFIG_BOOL_WARDEN_REQUIRE_EXACT_PROFILE,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -606,8 +616,8 @@ class World
             return lvl > 60 ? 300 + ((lvl - 60) * 75) / 10 : lvl * 5;
         }
 
-        void SetInitialWorldSettings();
-        void LoadConfigSettings(bool reload = false);
+        bool SetInitialWorldSettings();
+        bool LoadConfigSettings(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket* packet, AccountTypes minSec = SEC_PLAYER);

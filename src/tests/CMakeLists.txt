@@ -62,6 +62,34 @@ set(SRC_GRP_TESTS
     WaypointSmoothingTest.cpp
     ArbiterModelTest.cpp
     ShadowClassifierTest.cpp
+    WardenCryptoContextTest.cpp
+    WardenPacketCodecTest.cpp
+    WardenConfigurationTest.cpp
+    WardenEvidenceTest.cpp
+    WardenEnforcementPolicyTest.cpp
+    WardenModuleCatalogTest.cpp
+    WardenCheckCatalogTest.cpp
+    WardenCheckPlannerTest.cpp
+    WardenServerTest.cpp
+    WardenManagerTest.cpp
+    WardenAuditStoreTest.cpp
+    WardenIncidentStoreTest.cpp
+    WorldGatewayAuthTest.cpp
+    WardenAdmissionTest.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenProtocol.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCryptoContext.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenPacketCodec.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenConfiguration.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenEvidence.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenEnforcementPolicy.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenX86Transform.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleCatalog.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleWin15595X86Data.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleWin15595X64Data.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCheckCatalog.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCheckPlanner.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenServer.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
     # database globals that only mangosd defines. These three know nothing of it.
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
@@ -72,6 +100,7 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/MoveContract.cpp
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ArbiterModel.cpp
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ShadowClassifier.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Server/WorldGatewayAuth.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
     CryptoStressTest.cpp
@@ -88,8 +117,11 @@ source_group("tests" FILES ${SRC_GRP_TESTS})
 
 add_executable(mangos_tests ${SRC_GRP_TESTS})
 
+target_compile_definitions(mangos_tests PRIVATE MANGOS_WARDEN_TEST_ACCESS)
+
 target_include_directories(mangos_tests
     PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/game/Warden
         ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
         ${CMAKE_SOURCE_DIR}/src/game/Server
         ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators)
@@ -111,10 +143,10 @@ add_test(NAME proto_boundary
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckProtoBoundary.cmake)
 
-add_test(NAME warden_dormant_boundary
+add_test(NAME warden_boundary
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckDormantWardenBoundary.cmake)
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckWardenBoundary.cmake)
 
 add_test(NAME build_policy
     COMMAND ${CMAKE_COMMAND}

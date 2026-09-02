@@ -24,6 +24,7 @@
  */
 
 #include <cmath>
+#include <optional>
 #include <string>
 #include "World.h"
 #include "Database/DatabaseEnv.h"
@@ -81,6 +82,7 @@
 #include "GitRevision.h"
 #include "UpdateTime.h"
 #include "GameTime.h"
+#include "WardenManager.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -97,19 +99,23 @@
  */
 
 /// Initialize config values
-void World::LoadConfigSettings(bool reload)
+bool World::LoadConfigSettings(bool reload)
 {
+    std::optional<Config> stagedConfig;
+    Config* config = &sConfig;
     if (reload)
     {
-        if (!sConfig.Reload())
+        stagedConfig.emplace();
+        if (!stagedConfig->SetSource(sConfig.GetFilename().c_str()))
         {
             sLog.outError("World settings reload fail: can't read settings from %s.", sConfig.GetFilename().c_str());
-            return;
+            return false;
         }
+        config = &*stagedConfig;
     }
 
     ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
-    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    uint32 confVersion = config->GetIntDefault("ConfVersion", 0);
     if (!confVersion)
     {
         sLog.outError("*****************************************************************************");
@@ -130,6 +136,93 @@ void World::LoadConfigSettings(bool reload)
             Log::WaitBeforeContinueIfNeed();
         }
     }
+
+    // Warden is the only configuration group whose publication is a startup
+    // safety gate. Validate and atomically publish it before changing any
+    // cached World setting, so a rejected reload preserves the prior state.
+    warden::WardenRawConfiguration rawWarden;
+    rawWarden.enforcementMode = config->GetIntDefault(
+        "Warden.EnforcementMode", 0);
+    rawWarden.requireExactProfile = config->GetBoolDefault(
+        "Warden.RequireExactProfile", true);
+    rawWarden.requireCurrentX86Patch = config->GetBoolDefault(
+        "Warden.RequireCurrentX86Patch", true);
+    rawWarden.normalMinSeconds = config->GetIntDefault(
+        "Warden.CheckIntervalMin", 30);
+    rawWarden.normalMaxSeconds = config->GetIntDefault(
+        "Warden.CheckIntervalMax", 60);
+    rawWarden.aggressiveMinSeconds = config->GetIntDefault(
+        "Warden.AggressiveIntervalMin", 10);
+    rawWarden.aggressiveMaxSeconds = config->GetIntDefault(
+        "Warden.AggressiveIntervalMax", 20);
+    rawWarden.aggressiveThreshold = config->GetIntDefault(
+        "Warden.AggressiveThreshold", 5);
+    rawWarden.banThreshold = config->GetIntDefault(
+        "Warden.BanThreshold", 10);
+    rawWarden.incidentWindowSeconds = config->GetIntDefault(
+        "Warden.IncidentWindow", 900);
+
+    warden::WardenConfigurationNormalization const normalizedWarden =
+        warden::NormalizeWardenConfiguration(rawWarden);
+    if (normalizedWarden.corrections !=
+        warden::WardenConfigurationCorrection::None)
+    {
+        sLog.outError("Warden configuration contained invalid groups; "
+            "approved defaults were applied (correction mask %u).",
+            uint32(normalizedWarden.corrections));
+    }
+
+    warden::WardenManager& wardenManager = warden::WardenManager::Instance();
+    warden::RuntimeValidation const wardenValidation =
+        wardenManager.ValidateRuntimeConfiguration(normalizedWarden.value);
+    if (wardenValidation != warden::RuntimeValidation::Valid)
+    {
+        if (wardenValidation == warden::RuntimeValidation::ObserveRequired)
+        {
+            sLog.outError("Warden runtime configuration rejected: %s. "
+                "The current module set requires EnforcementMode 0.",
+                warden::ToString(wardenValidation));
+        }
+        else
+        {
+            sLog.outError("Warden runtime configuration rejected: %s.",
+                warden::ToString(wardenValidation));
+        }
+        return false;
+    }
+    bool const wardenPublished = reload ?
+        wardenManager.TryReplaceRuntimeConfiguration(normalizedWarden.value) :
+        wardenManager.ActivateRuntimeConfiguration(normalizedWarden.value);
+    if (!wardenPublished)
+    {
+        sLog.outError("Warden runtime configuration publication failed.");
+        return false;
+    }
+
+    // Only publish the parsed global configuration after the Warden runtime
+    // accepts the same candidate. A rejected reload therefore cannot leak a
+    // partially applied sConfig view to commands that read it directly.
+    if (stagedConfig)
+        sConfig = *stagedConfig;
+
+    m_configUint32Values[CONFIG_UINT32_WARDEN_ENFORCEMENT_MODE] =
+        uint32(normalizedWarden.value.enforcementMode);
+    m_configBoolValues[CONFIG_BOOL_WARDEN_REQUIRE_EXACT_PROFILE] =
+        normalizedWarden.value.requireExactProfile;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MIN] =
+        normalizedWarden.value.normalMinSeconds;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MAX] =
+        normalizedWarden.value.normalMaxSeconds;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MIN] =
+        normalizedWarden.value.aggressiveMinSeconds;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MAX] =
+        normalizedWarden.value.aggressiveMaxSeconds;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_AGGRESSIVE_THRESHOLD] =
+        normalizedWarden.value.aggressiveThreshold;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_BAN_THRESHOLD] =
+        normalizedWarden.value.banThreshold;
+    m_configUint32Values[CONFIG_UINT32_WARDEN_INCIDENT_WINDOW] =
+        normalizedWarden.value.incidentWindowSeconds;
 
     ///- Read the player limit and the Message of the day from the config file
     SetPlayerLimit(sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT), true);
@@ -693,6 +786,7 @@ void World::LoadConfigSettings(bool reload)
     }
 #endif /* ENABLE_ELUNA */
     sLog.outString();
+    return true;
 }
 
 /**

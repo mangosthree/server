@@ -1807,6 +1807,55 @@ OutdoorPvp.NAEnabled = 1
 OutdoorPvp.GHEnabled = 1
 
 ################################################################################
+# WARDEN
+#
+# The World database Warden catalogue is mandatory. Profiles are selected only
+# by exact client build, proven architecture, exact locale, and exact executable
+# fingerprint; no locale, architecture, or executable fallback is
+# used. Protocol, transport, timeout, unavailable, and unsupported outcomes are
+# operational failures, never proof of cheating.
+#
+# Warden.EnforcementMode
+#     0 = observe and audit anti-cheat outcomes; required for the first private
+#         rollout and while any compiled module is not both Full and
+#         ProductionApproved. Compatibility admission requirements below still
+#         disconnect clients that cannot satisfy them.
+#     1 = kick only after an actionable mismatch repeats in an isolated
+#         confirmation request.
+#     2 = kick after confirmation and permanently ban after BanThreshold
+#         confirmed incidents inside IncidentWindow.
+#     Default: 0 while the compiled Cata modules remain StaticVerified
+#
+# Warden.RequireExactProfile
+#     Reject unsupported exact clients in enforcing modes. Observe mode still
+#     admits them without Warden after recording one operational audit.
+#     Default: 1
+#
+# Warden.RequireCurrentX86Patch
+#     Disconnect the recognized legacy x86 MaNGOS patch after the safe profile
+#     fingerprint, or an x86 client whose fingerprint cannot be verified.
+#     This applies in every enforcement mode, including observe. The client
+#     never receives archive/MPQ requests, and this compatibility rejection
+#     records only an operational audit, never a cheating incident or ban.
+#     Default: 1
+#
+# Check intervals and IncidentWindow are seconds. AggressiveThreshold switches
+# subsequent sessions to the aggressive cadence; BanThreshold must be larger.
+#
+################################################################################
+
+Warden.EnforcementMode       = 0
+Warden.RequireExactProfile   = 1
+Warden.RequireCurrentX86Patch = 1
+Warden.CheckIntervalMin      = 30
+Warden.CheckIntervalMax      = 60
+Warden.AggressiveIntervalMin = 10
+Warden.AggressiveIntervalMax = 20
+Warden.AggressiveThreshold   = 5
+Warden.BanThreshold          = 10
+Warden.IncidentWindow        = 900
+
+################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads

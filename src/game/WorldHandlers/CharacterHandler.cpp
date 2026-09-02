@@ -338,6 +338,7 @@ void WorldSession::HandleCharEnum(QueryResult* result)
     }
 
     SendPacket(&data);
+    StartWardenBootstrap();
 }
 
 /**
@@ -847,6 +848,10 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
  */
 void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
 {
+    // Safety net for clients that enter world before the asynchronous character
+    // enumeration callback gets a chance to start the idempotent bootstrap.
+    StartWardenBootstrap();
+
     if (PlayerLoading() || GetPlayer() != NULL)
     {
         sLog.outError("Player tryes to login again, AccountId = %d", GetAccountId());
@@ -1414,4 +1419,3 @@ void WorldSession::HandleShowingCloakOpcode(WorldPacket & /*recv_data*/)
     DEBUG_LOG("CMSG_SHOWING_CLOAK for %s", _player->GetName());
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
 }
-

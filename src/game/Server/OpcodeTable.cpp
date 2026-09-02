@@ -45,6 +45,7 @@
  */
 
 #include "OpcodeTable.h"
+#include "Utilities/Errors.h"
 #include "WorldSession.h"
 
 /**
@@ -69,6 +70,42 @@ static void DefineOpcode(uint16 opcode, const char* name, SessionStatus status, 
 
 /// Correspondence between opcodes and their names
 OpcodeHandler opcodeTable[NUM_MSG_TYPES];
+
+namespace
+{
+/** Claims both Cata Warden slots only after all ordinary rows are installed. */
+void RegisterWardenOpcodes()
+{
+    auto assertUnclaimed = [](uint16 opcode)
+    {
+        MANGOS_ASSERT(opcodeTable[opcode].status == STATUS_UNHANDLED);
+        MANGOS_ASSERT(opcodeTable[opcode].packetProcessing == PROCESS_INPLACE);
+        MANGOS_ASSERT(opcodeTable[opcode].handler ==
+            &WorldSession::Handle_NULL);
+    };
+    assertUnclaimed(CMSG_WARDEN_DATA);
+    assertUnclaimed(SMSG_WARDEN_DATA);
+    OPCODE(CMSG_WARDEN_DATA, STATUS_AUTHED, PROCESS_THREADUNSAFE,
+        &WorldSession::HandleWardenDataOpcode);
+    OPCODE(SMSG_WARDEN_DATA, STATUS_NEVER, PROCESS_INPLACE,
+        &WorldSession::Handle_ServerSide);
+}
+
+/** Detects any later accidental overwrite of either owned wire slot. */
+void AssertWardenOpcodes()
+{
+    MANGOS_ASSERT(opcodeTable[CMSG_WARDEN_DATA].status == STATUS_AUTHED);
+    MANGOS_ASSERT(opcodeTable[CMSG_WARDEN_DATA].packetProcessing ==
+        PROCESS_THREADUNSAFE);
+    MANGOS_ASSERT(opcodeTable[CMSG_WARDEN_DATA].handler ==
+        &WorldSession::HandleWardenDataOpcode);
+    MANGOS_ASSERT(opcodeTable[SMSG_WARDEN_DATA].status == STATUS_NEVER);
+    MANGOS_ASSERT(opcodeTable[SMSG_WARDEN_DATA].packetProcessing ==
+        PROCESS_INPLACE);
+    MANGOS_ASSERT(opcodeTable[SMSG_WARDEN_DATA].handler ==
+        &WorldSession::Handle_ServerSide);
+}
+}
 
 /**
  * @brief Initialize opcode table
@@ -876,8 +913,6 @@ void InitializeOpcodes()
     OPCODE(CMSG_AREA_SPIRIT_HEALER_QUEUE,                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueueOpcode);
     OPCODE(SMSG_AREA_SPIRIT_HEALER_TIME,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_GM_UNTEACH,                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    OPCODE(SMSG_WARDEN_DATA,                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    OPCODE(CMSG_WARDEN_DATA,                               STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode          );
     OPCODE(CMSG_BATTLEGROUND_PLAYER_POSITIONS,           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattleGroundPlayerPositionsOpcode);
     OPCODE(SMSG_BATTLEGROUND_PLAYER_POSITIONS,           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_PET_STOP_ATTACK,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetStopAttack             );
@@ -1471,4 +1506,7 @@ void InitializeOpcodes()
     OPCODE(CMSG_REFORGE_ITEM,                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleReforgeItemOpcode         );
     OPCODE(SMSG_REFORGE_RESULT,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_START_TIMER,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+
+    RegisterWardenOpcodes();
+    AssertWardenOpcodes();
 };

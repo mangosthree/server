@@ -26,6 +26,7 @@
 #include "MotionDriver.h"
 #include "ObjectLookup.h"
 #include "Unit.h"
+#include "WaypointSmoothing.h"
 #include "movement/MoveSpline.h"
 #include "movement/MoveSplineInit.h"
 
@@ -196,7 +197,18 @@ bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
             return false;
         }
 
-        init.MovebyPath(query->Points());
+        // Waypoint smoothing may reject a generated leg and deliberately fall
+        // back through this general router. Sanitize that routed geometry using
+        // the same live-spline/vehicle position Launch will put on the wire. Only
+        // packed duplicate vertices are removed, preserving the routed corners.
+        Movement::PointsArray routedPath = query->Points();
+        if (!SanitizeWaypointSmoothingWirePath(routedPath, init.ResolveLaunchPosition()))
+        {
+            m_blocked = true;
+            return false;
+        }
+
+        init.MovebyPath(routedPath);
         m_partialLeg = query->Partial();
     }
 

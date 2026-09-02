@@ -52,6 +52,11 @@ TEST(WaypointSmoothing_rejects_a_packed_tail_that_collapses_onto_the_destination
           WAYPOINT_SMOOTHING_MIN_SEGMENT_LENGTH);
     CHECK(!IsWaypointSmoothingWireSafe(path, destination));
 
+    std::vector<Vector3> routedFallback = path;
+    CHECK(SanitizeWaypointSmoothingWirePath(routedFallback, destination));
+    CHECK(routedFallback.back() == destination);
+    CHECK(IsWaypointSmoothingWireSafe(routedFallback, destination));
+
     // Moving that intermediate point beyond one packed unit preserves a real
     // final segment after client reconstruction and keeps the same loop valid.
     path[path.size() - 2].x = destination.x + 0.30f;
@@ -73,4 +78,44 @@ TEST(WaypointSmoothing_uses_the_actual_launch_position_for_the_packing_grid)
     CHECK((path.back() - path[path.size() - 2]).length() >=
           WAYPOINT_SMOOTHING_MIN_SEGMENT_LENGTH);
     CHECK(!IsWaypointSmoothingWireSafe(path, launchPosition));
+}
+
+TEST(WaypointSmoothing_checks_source_index_one_as_the_first_packed_vertex)
+{
+    // InitCatmullRom stores source path[0] at spline point 1. PacketBuilder's
+    // real_path therefore maps source path[1] to its first packed vertex.
+    // Use exact quarter-yard values so this fixture exercises index mapping,
+    // not binary rounding around a quantization boundary.
+    const Vector3 launchPosition(0.0f, 0.0f, 0.0f);
+    std::vector<Vector3> path{
+        Vector3(0.25f, 0.0f, 0.0f),
+        launchPosition,
+        Vector3(1.50f, 0.0f, 0.0f),
+        Vector3(2.0f, 0.0f, 0.0f)
+    };
+
+    CHECK(!IsWaypointSmoothingWireSafe(path, launchPosition));
+}
+
+TEST(WaypointSmoothing_sanitizes_a_routed_path_without_discarding_distinct_corners)
+{
+    const Vector3 launchPosition(0.10f, 0.0f, 0.0f);
+    const Vector3 retainedCorner(0.90f, 0.0f, 0.0f);
+    const Vector3 destination(2.10f, 0.0f, 0.0f);
+    std::vector<Vector3> path{
+        Vector3(0.0f, 0.0f, 0.0f),
+        retainedCorner,
+        Vector3(0.95f, 0.0f, 0.0f),
+        destination
+    };
+
+    CHECK(!IsWaypointSmoothingWireSafe(path, launchPosition));
+
+    CHECK(SanitizeWaypointSmoothingWirePath(path, launchPosition));
+
+    CHECK(path.size() == 3);
+    CHECK(path.front() == launchPosition);
+    CHECK(path[1] == retainedCorner);
+    CHECK(path.back() == destination);
+    CHECK(IsWaypointSmoothingWireSafe(path, launchPosition));
 }

@@ -194,6 +194,22 @@ void Player::SaveToDB()
             savedZ = vessel->Where().Z();
             savedO = vessel->Where().Facing();
         }
+        // A VEHICLE rider is not on a Transport and so misses the branch above.
+        // Its own placement is world-frame but only resynced as the vehicle
+        // moves, so it can lag the carrier by a tick - and any future desync
+        // here would persist a bad pose that outlives the vehicle. Save the
+        // carrier's pose instead: it is world-frame and current by definition.
+        else if (TransportInfo* seat = GetTransportInfo())
+        {
+            if (WorldObject* carrier = seat->GetTransport())
+            {
+                savedMap = carrier->GetMapId();
+                savedX = carrier->Where().X();
+                savedY = carrier->Where().Y();
+                savedZ = carrier->Where().Z();
+                savedO = carrier->Where().Facing();
+            }
+        }
 
         uberInsert.addUInt32(savedMap);
         uberInsert.addUInt32(uint32(GetDungeonDifficulty()));

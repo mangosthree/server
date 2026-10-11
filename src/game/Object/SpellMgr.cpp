@@ -2625,8 +2625,15 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     }
 
     // more generic checks
+    // Icon 1 is the "no icon assigned" placeholder rather than an identity:
+    // 22,661 of the 73,253 spells in 4.3.4 carry it, from Word of Recall to
+    // internal test spells, so a match on it means nothing. Treating it as one
+    // makes a third of the spell table mutually exclusive - it is why the
+    // Gilneas phase aura and the quest invisibility detection that spell_area
+    // casts beside it kept removing one another, both being serverside spells
+    // Blizzard never gave an icon.
     if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
-        spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
+        spellInfo_1->SpellIconID > 1 && spellInfo_2->SpellIconID > 1)
     {
         bool isModifier = false;
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)

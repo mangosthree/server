@@ -396,6 +396,45 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 }
 
 /**
+ * Tells whether some lock in Lock.dbc names this spell as the key that opens it.
+ *
+ * \arg \c spellId
+ *   The spell the client is asking to cast.
+ * \return
+ *   true when the spell is a lock key and so may be cast unlearned.
+ */
+static bool IsLockKeySpell(uint32 spellId)
+{
+    // Built once. The table is small and never changes at runtime, and the
+    // lookup only happens on the path where a cast is about to be refused.
+    static const std::set<uint32> lockKeySpells = []()
+    {
+        std::set<uint32> spells;
+
+        for (uint32 i = 0; i < sLockStore.GetNumRows(); ++i)
+        {
+            LockEntry const* lockInfo = sLockStore.LookupEntry(i);
+            if (!lockInfo)
+            {
+                continue;
+            }
+
+            for (int j = 0; j < 8; ++j)
+            {
+                if (lockInfo->Type[j] == LOCK_KEY_SPELL && lockInfo->Index[j])
+                {
+                    spells.insert(lockInfo->Index[j]);
+                }
+            }
+        }
+
+        return spells;
+    }();
+
+    return lockKeySpells.find(spellId) != lockKeySpells.end();
+}
+
+/**
  * @brief Handles a player or controlled-unit spell cast request.
  *
  * @param recvPacket The incoming cast-spell packet.
@@ -445,9 +484,18 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                                    group->IsAssistant(mover->GetObjectGuid()));
         }
 
+        // Spell locks are the same story: Lock.dbc key type 3 names the spell
+        // that opens an object, and the client casts it straight from the
+        // interaction without the player ever learning it. Gilneas' Merchant
+        // Square doors are locked this way on 67869 "Knocking". The cast still
+        // has to survive CheckCast, which needs a game object in range whose
+        // lock actually names this spell, so allowing it here grants nothing
+        // on its own.
+        bool lockKeySpell = IsLockKeySpell(spellId);
+
         // not have spell in spellbook or spell passive and not casted by client
 
-        if (!raidMarker &&
+        if (!raidMarker && !lockKeySpell &&
             ((!((Player*)mover)->HasActiveSpell(spellId) && !triggeredByAura) || IsPassiveSpell(spellInfo)))
         {
             sLog.outError("World: %s casts spell %u which he shouldn't have", mover->GetGuidStr().c_str(), spellId);
@@ -771,19 +819,32 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
-    if (_player->IsInCombat() && !_player->GetMap()->IsDungeon())
-    {
-        return;
-    }
-
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
-    if (!unit || unit->IsInCombat())                        // client prevent click and set different icon at combat state
+    if (!unit)
     {
         return;
     }
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());
+
+    // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
+    if ((_player->IsInCombat() && !_player->GetMap()->IsDungeon()) || unit->IsInCombat())
+    {
+        // The client normally refuses this click itself - combat cursor, no
+        // packet - so this gate only ever fires when the two disagree (a
+        // combat state the client does not know about). Dropped silently, the
+        // click just looks broken; say WHY it was refused.
+        for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+        {
+            if (SpellEntry const* pClickSpell = sSpellStore.LookupEntry(itr->second.spellId))
+            {
+                Spell::SendCastResult(_player, pClickSpell, 0, SPELL_FAILED_AFFECTING_COMBAT);
+                break;
+            }
+        }
+
+        return;
+    }
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
     {
         if (itr->second.IsFitToRequirements(_player, unit))

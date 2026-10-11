@@ -50,6 +50,7 @@
 #include "Utilities/MathDefines.h"
 #include <cstdlib>
 #include <map>
+#include <mutex>
 #include <set>
 #include <list>
 #include <ctime>
@@ -1307,6 +1308,20 @@ void Aura::ReapplyAffectedPassiveAuras()
 /**
  * @brief Triggers the spell associated with the aura effect.
  */
+namespace
+{
+    /// True the first time a given spell and effect is seen, so an unresolved
+    /// trigger on a periodic aura is reported once instead of on every tick
+    bool FirstReportOfMissingTrigger(uint32 spellId, uint32 effIdx)
+    {
+        static std::mutex s_reportedMutex;
+        static std::set<uint64> s_reported;
+
+        std::lock_guard<std::mutex> guard(s_reportedMutex);
+        return s_reported.insert((uint64(spellId) << 32) | effIdx).second;
+    }
+}
+
 void Aura::TriggerSpell()
 {
     ObjectGuid casterGUID = GetCasterGuid();
@@ -2483,7 +2498,12 @@ void Aura::TriggerSpell()
         {
             if (triggerTarget->GetTypeId() != TYPEID_UNIT || !sScriptMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)triggerTarget, ObjectGuid()))
             {
-                sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?", GetId(), GetEffIndex());
+                // Usually a serverside trigger absent from Spell.dbc, so on a
+                // periodic aura this would repeat for every tick - report once
+                if (FirstReportOfMissingTrigger(GetId(), GetEffIndex()))
+                {
+                    sLog.outError("Aura::TriggerSpell: Spell %u effect %d triggers spell %u, which does not exist and has no custom case", GetId(), GetEffIndex(), trigger_spell_id);
+                }
             }
         }
     }

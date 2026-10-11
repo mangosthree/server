@@ -2672,6 +2672,11 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
         return true;
     }
 
+    if (pVictim->IsImmuneToAttacker(this))
+    {
+        return true;
+    }
+
     if (!pVictim->isInAccessablePlaceFor(this))
     {
         return true;

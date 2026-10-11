@@ -3539,6 +3539,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
     return SPELL_AURA_PROC_OK;
 }
 
+enum
+{
+    SPELL_SPELL_PRACTICE      = 83470,                  ///< worn by the practice targets
+    NPC_SPELL_PRACTICE_CREDIT = 44175                   ///< credited to the practising player
+};
+
 /**
  * @brief Handles proc-trigger-spell auras and resolves their triggered casts.
  *
@@ -3567,6 +3573,35 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 
     Item* castItem = triggeredByAura->GetCastItemGuid() && GetTypeId() == TYPEID_PLAYER
                      ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : NULL;
+
+    // `Spell Practice` carries no trigger spell of its own. The starting zone
+    // practice targets wear it - training dummies, the Tiki Target and the
+    // Gilneas Bloodfang Worgen - solely so the class quests can credit the
+    // player for using the ability they were just taught.
+    if (auraSpellInfo->ID == SPELL_SPELL_PRACTICE)
+    {
+        if (!procSpell || !pVictim || pVictim->GetTypeId() != TYPEID_PLAYER)
+        {
+            return SPELL_AURA_PROC_FAILED;
+        }
+
+        switch (procSpell->ID)
+        {
+            case 100:                                   // Charge, warrior
+            case 348:                                   // Immolate, warlock
+            case 774:                                   // Rejuvenation, druid
+            case 2061:                                  // Flash Heal, priest
+            case 2098:                                  // Eviscerate, rogue
+            case 5143:                                  // Arcane Missiles, mage
+            case 20271:                                 // Judgement, paladin
+            case 56641:                                 // Steady Shot, hunter
+            case 73899:                                 // Primal Strike, shaman
+                ((Player*)pVictim)->KilledMonsterCredit(NPC_SPELL_PRACTICE_CREDIT);
+                return SPELL_AURA_PROC_OK;
+            default:
+                return SPELL_AURA_PROC_FAILED;
+        }
+    }
 
     // Try handle unknown trigger spells
     // Custom requirements (not listed in procEx) Warning! damage dealing after this

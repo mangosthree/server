@@ -249,6 +249,9 @@ void Player::UpdateArea(uint32 newArea)
     }
 
     UpdateAreaDependentAuras();
+
+    // The zone changed, so the set of phase definitions in force may have too.
+    UpdatePhaseDefinitions();
 }
 
 /**
@@ -445,6 +448,83 @@ void Player::UpdateZoneDependentAuras()
 /**
  * @brief Applies or removes auras that depend on the player's current subzone.
  */
+/**
+ * @brief Sends the client the phase ids and terrain swaps for the current zone.
+ *
+ * Walks `phase_definitions` for the zone in `entry` order, evaluating each
+ * row's condition, and pushes the accumulated result to the client. The
+ * terrain-swap half is what changes world geometry: Gilneas renders the intact
+ * city (map 638) over its ruined base map until the story destroys it.
+ *
+ * Server-side `phasemask` is deliberately left alone here -- that is driven by
+ * `spell_area` phase auras and already works. This only supplies what the
+ * client is otherwise never told, so zones without definitions keep their
+ * present behaviour untouched.
+ */
+void Player::UpdatePhaseDefinitions()
+{
+    PhaseDefinitionStore const* store = sObjectMgr.GetPhaseDefinitionStore();
+    if (!store)
+    {
+        return;
+    }
+
+    PhaseDefinitionStore::const_iterator zone = store->find(GetZoneId());
+    if (zone == store->end())
+    {
+        // No data for this zone: stay silent rather than assert "unphased",
+        // so behaviour is unchanged everywhere the DB says nothing.
+        return;
+    }
+
+    std::set<uint32> phaseIds;
+    std::set<uint32> terrainSwaps;
+
+    // Phase ids come only from the definitions. Deriving them from the
+    // player's phasemask by searching Phase.dbc is wrong on both counts:
+    // PhaseEntry::PhaseShift holds identifiers (1, 15, 29, 43, 57, ...) rather
+    // than bit patterns, so a mask test matches any row that happens to share a
+    // set bit, and an equality test invents an id the data never asked for.
+    // An empty list is how "unphased" is signalled -- the sender turns that into
+    // flag 8 -- and terrain swaps are delivered independently of it.
+    for (PhaseDefinitionContainer::const_iterator itr = zone->second.begin();
+         itr != zone->second.end(); ++itr)
+    {
+        PhaseDefinition const* definition = *itr;
+
+        if (definition->conditionId &&
+            !sObjectMgr.IsPlayerMeetToCondition(definition->conditionId, this,
+                                                GetMap(), NULL,
+                                                CONDITION_FROM_SPELL_AREA))
+        {
+            continue;
+        }
+
+        if (definition->IsOverwritingExistingPhases())
+        {
+            phaseIds.clear();
+            terrainSwaps.clear();
+        }
+
+        if (definition->phaseId)
+        {
+            phaseIds.insert(definition->phaseId);
+        }
+
+        if (definition->terrainswapmap)
+        {
+            terrainSwaps.insert(definition->terrainswapmap);
+        }
+
+        if (definition->IsLastDefinition())
+        {
+            break;
+        }
+    }
+
+    GetSession()->SendSetPhaseShift(phaseIds, terrainSwaps);
+}
+
 void Player::UpdateAreaDependentAuras()
 {
     // remove auras from spells with area limitations

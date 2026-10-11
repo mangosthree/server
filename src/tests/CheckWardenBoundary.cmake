@@ -221,13 +221,19 @@ require_text(REVISIONS_TEXT "#define REALMD_DB_STRUCTURE_NR      \"5\""
 require_text(REVISIONS_TEXT
     "#define REALMD_DB_UPDATE_DESCRIPT   \"Cata Warden identity\""
     "Realm description requirement is stale")
-require_text(REVISIONS_TEXT "#define WORLD_DB_STRUCTURE_NR       \"10\""
-    "World structure requirement must be 22/10/003")
-require_text(REVISIONS_TEXT "#define WORLD_DB_CONTENT_NR         \"3\""
-    "World content requirement must be 22/10/003")
-require_text(REVISIONS_TEXT
-    "#define WORLD_DB_UPDATE_DESCRIPT    \"Cata_Warden_MPQ_Checks\""
-    "World description requirement is stale")
+# The Warden catalogue arrives in world update 22/10/003. The update chain is
+# linear, so any later requirement carries it; pinning the exact number would
+# fail the next unrelated world migration.
+string(REGEX MATCH "#define WORLD_DB_STRUCTURE_NR +\"([0-9]+)\"" _ "${REVISIONS_TEXT}")
+set(WORLD_STRUCTURE "${CMAKE_MATCH_1}")
+string(REGEX MATCH "#define WORLD_DB_CONTENT_NR +\"([0-9]+)\"" _ "${REVISIONS_TEXT}")
+set(WORLD_CONTENT "${CMAKE_MATCH_1}")
+if(WORLD_STRUCTURE STREQUAL "" OR WORLD_CONTENT STREQUAL ""
+        OR WORLD_STRUCTURE LESS 10
+        OR (WORLD_STRUCTURE EQUAL 10 AND WORLD_CONTENT LESS 3))
+    message(FATAL_ERROR
+        "World requirement must be 22/10/003 or later, found 22/${WORLD_STRUCTURE}/${WORLD_CONTENT}")
+endif()
 require_text(WORLD_CONFIG_TEXT "bool World::LoadConfigSettings(bool reload)"
     "configuration reload must report rejection")
 require_order(WORLD_CONFIG_TEXT "ValidateRuntimeConfiguration"

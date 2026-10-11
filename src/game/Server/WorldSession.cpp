@@ -1617,7 +1617,25 @@ void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
     SendPacket(&data);
 }
 
-/*
+/**
+ * @brief Tells the client which phases it is in and which terrain to render.
+ *
+ * The single-mask overload above can only express one Phase.dbc id -- it writes
+ * a 32-bit phasemask into a uint16 field -- and carries at most one terrain
+ * swap. This one sends both lists properly.
+ *
+ * The terrain-swap list is the half that matters for world geometry: it names
+ * Map.dbc ids whose tiles replace the current map's wherever they exist. Gilneas
+ * relies on it, rendering the intact city (map 638) over the ruined base map 654
+ * until the story destroys it. Sending no swaps leaves the client on the base
+ * map, which is why an unphased client always sees the aftermath.
+ *
+ * @param phaseIds
+ *   Phase.dbc ids the player is in. Empty means unphased, which is signalled to
+ *   the client by flag 8 rather than by an empty list.
+ * @param terrainswaps
+ *   Map.dbc ids to render in place of the current map's terrain.
+ */
 void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps)
 {
     if (PlayerLoading())
@@ -1660,7 +1678,6 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     data.WriteGuidBytes<5>(guid);
     SendPacket(&data);
 }
-*/
 
 /**
  * @brief Resolves a localized MaNGOS string for this session locale.

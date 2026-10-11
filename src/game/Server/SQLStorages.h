@@ -38,6 +38,7 @@ extern SQLStorage sItemStorage;
 extern SQLStorage sInstanceTemplate;
 extern SQLStorage sWorldTemplate;
 extern SQLStorage sConditionStorage;
+extern SQLStorage sCreatureSparringStorage;
 
 extern SQLHashStorage sSpellTemplate;
 extern SQLHashStorage sGOStorage;

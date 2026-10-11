@@ -30,7 +30,9 @@
 #include "MotionMaster.h"
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
+#include "FormationMovementGenerator.h"
 #include "HomeMovementGenerator.h"
+#include "PathMovementGenerator.h"
 #include "IdleMovementGenerator.h"
 #include "PointMovementGenerator.h"
 #include "TargetedMovementGenerator.h"
@@ -563,6 +565,53 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 
     ShadowRequest(Arbiter::MoveKind::Point, id);
     Mutate(new PointMovementGenerator(id, x, y, z, generatePath));
+}
+
+/**
+ * @brief Rides an authored point list as one spline (no routing).
+ * @param id ID echoed to the AI via MovementInform(PATH_MOTION_TYPE, id).
+ * @param points The route, in world coordinates, already on walkable ground.
+ * @param walk Walk pace, else run.
+ */
+void MotionMaster::MovePath(uint32 id, Movement::PointsArray const& points, bool walk)
+{
+    if (points.empty())
+    {
+        return;
+    }
+
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s rides authored path (Id: %u points: %u)",
+                     m_owner->GetGuidStr().c_str(), id, uint32(points.size()));
+
+    ShadowRequest(Arbiter::MoveKind::Point, id);
+    Mutate(new PathMovementGenerator(id, points, walk));
+}
+
+/**
+ * @brief Holds a formation slot at (angle, range) relative to a leader.
+ * @param leader The column's spine.
+ * @param range Slot distance from the leader.
+ * @param angle Slot bearing relative to the leader's heading.
+ */
+void MotionMaster::MoveInFormation(Unit* leader, float range, float angle)
+{
+    if (m_owner->hasUnitState(UNIT_STAT_LOST_CONTROL))
+    {
+        return;
+    }
+
+    if (!leader || leader == m_owner)
+    {
+        return;
+    }
+
+    Clear();
+
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s takes formation slot behind %s",
+                     m_owner->GetGuidStr().c_str(), leader->GetGuidStr().c_str());
+
+    ShadowRequest(Arbiter::MoveKind::FollowTarget);
+    Mutate(new FormationMovementGenerator(*leader, range, angle));
 }
 
 /**

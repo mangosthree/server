@@ -27,6 +27,7 @@
 #define MANGOS_MOTIONMASTER_H
 
 #include "Platform/Define.h"
+#include "movement/MoveSplineInitArgs.h"
 #include <memory>
 #include <sstream>
 
@@ -67,6 +68,8 @@ enum MovementGeneratorType
     TIMED_FLEEING_MOTION_TYPE = 13,        ///< Timed fleeing (FleeingMovementGenerator.h - alternative second part of flee for assistance)
     FOLLOW_MOTION_TYPE = 14,               ///< Follow movement (TargetedMovementGenerator.h)
     EFFECT_MOTION_TYPE = 15,               ///< Effect movement
+    PATH_MOTION_TYPE = 16,                 ///< Authored-path playback (PathMovementGenerator.h)
+    FORMATION_MOTION_TYPE = 17,            ///< Formation slot behind a leader (FormationMovementGenerator.h)
 
     EXTERNAL_WAYPOINT_MOVE = 256,          ///< External waypoint move (used in CreatureAI::MovementInform when waypoint reached)
     EXTERNAL_WAYPOINT_MOVE_START = 512,    ///< External waypoint move start (used in CreatureAI::MovementInform when waypoint started)
@@ -220,6 +223,17 @@ class MotionMaster : private std::stack<MovementGenerator*>
          * @param generatePath Whether to generate a path to the destination.
          */
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
+
+        /// Ride an authored point list as ONE spline - the retail way to run a
+        /// scripted route (points from a capture or a surveyed street). No
+        /// routing: the geometry is the authority. Fires
+        /// MovementInform(PATH_MOTION_TYPE, id) on arrival.
+        void MovePath(uint32 id, Movement::PointsArray const& points, bool walk = false);
+
+        /// Hold a slot at (angle, range) relative to a leader's heading,
+        /// aiming where the leader is GOING (his live spline's destination).
+        /// Every leg is routed; an unroutable slot waits a beat and retries.
+        void MoveInFormation(Unit* leader, float range, float angle);
 
         /**
          * @brief Makes the unit seek assistance at a specific point.

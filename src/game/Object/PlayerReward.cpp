@@ -109,11 +109,12 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
  * @brief Rewards the player for killing a unit outside group reward distribution.
  *
  * @param pVictim The killed unit.
+ * @param bNoExperience The kill grants no experience, but still grants everything else.
  */
-void Player::RewardSinglePlayerAtKill(Unit* pVictim)
+void Player::RewardSinglePlayerAtKill(Unit* pVictim, bool bNoExperience /*= false*/)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
-    uint32 xp = PvP ? 0 : MaNGOS::XP::Gain(this, pVictim);
+    uint32 xp = (PvP || bNoExperience) ? 0 : MaNGOS::XP::Gain(this, pVictim);
 
     // honor can be in PvP and !PvP (racial leader) cases
     RewardHonor(pVictim, 1);

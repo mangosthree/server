@@ -1449,16 +1449,24 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
         }
 
+        // A kill dealt by the vehicle its rider is sitting in is the vehicle's,
+        // not the rider's: quest credit still counts, experience does not.
+        bool bVehicleKill = false;
+        if (player_tap && player_tap != this && player_tap->IsBoarded())
+        {
+            bVehicleKill = player_tap->GetTransportInfo()->GetTransport() == this;
+        }
+
         // Reward player, his pets, and group/raid members
         if (player_tap != pVictim)
         {
             if (group_tap)
             {
-                group_tap->RewardGroupAtKill(pVictim, player_tap);
+                group_tap->RewardGroupAtKill(pVictim, player_tap, bVehicleKill);
             }
             else if (player_tap)
             {
-                player_tap->RewardSinglePlayerAtKill(pVictim);
+                player_tap->RewardSinglePlayerAtKill(pVictim, bVehicleKill);
             }
         }
 

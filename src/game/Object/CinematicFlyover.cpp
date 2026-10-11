@@ -342,6 +342,14 @@ void CinematicFlyover::Stop()
     // Step 1: Reset camera (must happen before body removal)
     m_player->GetCamera().ResetView(true);
 
+    // Questgiver status sent while the camera was bound to the body never
+    // reaches the marker: the client is looking through a remote creature and
+    // drops it, so a brand-new character finds the zone's first questgiver
+    // wearing no exclamation mark until something forces a refresh (relogging,
+    // or any packet that makes the client re-query). Re-send now that the
+    // viewpoint is the player again.
+    m_player->SendQuestGiverStatusMultiple();
+
     // Step 2: Despawn body (resolve by GUID to avoid dangling pointer)
     Creature* body = ResolveBody();
     if (body)

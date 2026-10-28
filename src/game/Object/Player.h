@@ -3029,7 +3029,7 @@ class Player : public Unit
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
 
         // Reward a single player at a kill
-        void RewardSinglePlayerAtKill(Unit* pVictim);
+        void RewardSinglePlayerAtKill(Unit* pVictim, bool bNoExperience = false);
 
         // Reward the player and group at an event
         void RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource);

@@ -296,14 +296,19 @@ bool Player::IsCurrentQuest(uint32 quest_id, uint8 completed_or_not) const
 
     QuestStatusData const& questStatus = itr->second;
 
+    /// GetQuestStatus() reports FORCE_COMPLETE as COMPLETE - match it here.
+    bool const bComplete = (questStatus.m_status == QUEST_STATUS_COMPLETE ||
+                            questStatus.m_status == QUEST_STATUS_FORCE_COMPLETE) &&
+                           !questStatus.m_rewarded;
+
     switch (completed_or_not)
     {
         case 1:
             return questStatus.m_status == QUEST_STATUS_INCOMPLETE;
         case 2:
-            return questStatus.m_status == QUEST_STATUS_COMPLETE && !questStatus.m_rewarded;
+            return bComplete;
         default:
-            return questStatus.m_status == QUEST_STATUS_INCOMPLETE || (questStatus.m_status == QUEST_STATUS_COMPLETE && !questStatus.m_rewarded);
+            return questStatus.m_status == QUEST_STATUS_INCOMPLETE || bComplete;
     }
 }
 

@@ -108,13 +108,15 @@ namespace Arbiter
             case CHASE_MOTION_TYPE:               return MoveKind::Chase;
             case HOME_MOTION_TYPE:                return MoveKind::Home;
             case FLIGHT_MOTION_TYPE:              return MoveKind::Taxi;
-            case POINT_MOTION_TYPE:               return MoveKind::Point;
+            case POINT_MOTION_TYPE:
+            case PATH_MOTION_TYPE:                return MoveKind::Point;
             case FLEEING_MOTION_TYPE:
             case TIMED_FLEEING_MOTION_TYPE:       return MoveKind::Fear;
             case DISTRACT_MOTION_TYPE:            return MoveKind::Distract;
             case ASSISTANCE_MOTION_TYPE:          return MoveKind::AssistanceRun;
             case ASSISTANCE_DISTRACT_MOTION_TYPE: return MoveKind::AssistanceDistract;
-            case FOLLOW_MOTION_TYPE:              return MoveKind::FollowTarget;
+            case FOLLOW_MOTION_TYPE:
+            case FORMATION_MOTION_TYPE:           return MoveKind::FollowTarget;
             case EFFECT_MOTION_TYPE:              return MoveKind::Effect;
             default:                              return MoveKind::Idle;
         }

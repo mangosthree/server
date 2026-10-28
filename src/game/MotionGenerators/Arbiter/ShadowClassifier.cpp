@@ -37,6 +37,7 @@ namespace Arbiter
             switch (type)
             {
                 case POINT_MOTION_TYPE:
+                case PATH_MOTION_TYPE:
                 case EFFECT_MOTION_TYPE:
                 case HOME_MOTION_TYPE:
                 case DISTRACT_MOTION_TYPE:

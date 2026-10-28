@@ -154,6 +154,17 @@ namespace Movement
             void SetWalk(bool enable);
 
             /**
+             * @brief Marks the path as ground-hugging: the client projects
+             * each interpolated step onto the surface underneath instead of
+             * lerping straight through the air. Retail stamps this on every
+             * ordinary ground leg (flag 0x100000 in the 18019 captures);
+             * without it a leg across uneven ground - a pitched roof - cuts
+             * the surface and the client plays the falling animation.
+             * Disabled by default.
+             */
+            void SetSmoothGroundPath() { args.flags.smoothGroundPath = true; }
+
+            /**
              * @brief Makes movement cyclic. Disabled by default.
              */
             void SetCyclic();

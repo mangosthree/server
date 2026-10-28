@@ -79,6 +79,14 @@ if(NOT MySQL_FOUND)
   list(APPEND _MySQL_paths ${_MySQL_mariadb_install_dirs})
   unset(_MySQL_mariadb_install_dirs)
 
+  # MySQL's installer does the same with "MySQL Server <version>", so glob
+  # it too rather than adding each release (8.4, 9.x) to the list below.
+  file(GLOB _MySQL_server_install_dirs
+    "C:/Program Files/MySQL/MySQL Server */"
+    "C:/Program Files (x86)/MySQL/MySQL Server */")
+  list(APPEND _MySQL_paths ${_MySQL_server_install_dirs})
+  unset(_MySQL_server_install_dirs)
+
   foreach (_MySQL_version IN LISTS _MySQL_versions)
     list(APPEND _MySQL_paths
       "C:/Program Files/MySQL/MySQL Server ${_MySQL_version}/lib/opt"

@@ -466,6 +466,7 @@ class Spell
         void EffectEnchantItemPrismatic(SpellEffectEntry const* effect);
         void EffectPlaySound(SpellEffectEntry const* effect);
         void EffectPlayMusic(SpellEffectEntry const* effect);
+        void EffectPlayMovie(SpellEffectEntry const* effect);
         void EffectSpecCount(SpellEffectEntry const* effect);
         void EffectActivateSpec(SpellEffectEntry const* effect);
         void EffectCancelAura(SpellEffectEntry const* effect);

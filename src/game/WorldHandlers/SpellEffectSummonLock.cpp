@@ -205,6 +205,8 @@ void Spell::EffectOpenLock(SpellEffectEntry const* effect)
         itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
     }
 
+    // Must stay LOOT_SKINNING: an unsolicited loot response is only accepted by
+    // the 4.3.4 client for types 2,3,4,6,7,8,9 - LOOT_CORPSE (1) is refused
     SendLoot(guid, LOOT_SKINNING, LockType(effect->EffectMiscValue_0));
 
     // not allow use skill grow at item base open

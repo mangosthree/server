@@ -331,6 +331,25 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
         return;
     }
 
+    // 68682 Call Attack Mastiffs (Leader of the Pack, 14386): the spell's
+    // own summon is retail's inert pack CONTROLLER (36409, a mastiff-shaped
+    // bunny). Summoned through the property table here it becomes a PET -
+    // an eleventh dog labeled "<player>'s Guardian" that chains the player
+    // into its combat. The script summons the real pack; the controller
+    // has no job on this core.
+    // 68908 likewise: the Hungry Ettin lasso's trigger - its throw VISUAL is
+    // wanted, its summon (the harnessed-horse controller) is not; the lasso
+    // is served in PetHandler.
+    // 70795 likewise: the Dark Scout ambush (Losing Your Tail, 24616) -
+    // 70794's forcecast chain summons the scout on retail; here the static
+    // spawn plays the ambusher (npc_dark_scout), so the summon would be a
+    // duplicate.
+    if (m_spellInfo->ID == 68682 || m_spellInfo->ID == 68908 ||
+        m_spellInfo->ID == 70795)
+    {
+        return;
+    }
+
     uint32 prop_id = effect->EffectMiscValue_1;
     SummonPropertiesEntry const *summon_prop = sSummonPropertiesStore.LookupEntry(prop_id);
     if (!summon_prop)

@@ -671,6 +671,91 @@ void ObjectMgr::LoadConditions()
 }
 
 /**
+ * @brief Loads `phase_definitions` into the per-zone phase definition store.
+ *
+ * Rows are stored per zone in `entry` order; the evaluator walks them in that
+ * order and may stop early on a row flagged PHASE_FLAG_NO_MORE_PHASES. A row
+ * carrying a `terrainswapmap` replaces the zone's world geometry client-side,
+ * which is how Gilneas presents the intact city (map 638) over its ruined base
+ * map until the story destroys it.
+ */
+void ObjectMgr::LoadPhaseDefinitions()
+{
+    for (PhaseDefinitionStore::iterator zone = _PhaseDefinitionStore.begin();
+         zone != _PhaseDefinitionStore.end(); ++zone)
+    {
+        for (PhaseDefinitionContainer::iterator itr = zone->second.begin();
+             itr != zone->second.end(); ++itr)
+        {
+            delete *itr;
+        }
+    }
+    _PhaseDefinitionStore.clear();
+
+    //                                                   0        1        2
+    QueryResult* result = WorldDatabase.Query("SELECT `zoneId`, `entry`, `phasemask`, "
+                          //                           3          4                 5        6
+                          "`phaseId`, `terrainswapmap`, `flags`, `condition_id` "
+                          "FROM `phase_definitions` ORDER BY `zoneId`, `entry`");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString();
+        sLog.outString(">> Loaded 0 phase definitions. DB table `phase_definitions` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+    uint32 count = 0;
+
+    do
+    {
+        bar.step();
+        Field* fields = result->Fetch();
+
+        PhaseDefinition* definition = new PhaseDefinition();
+        definition->zoneId         = fields[0].GetUInt32();
+        definition->entry          = fields[1].GetUInt32();
+        definition->phasemask      = fields[2].GetUInt32();
+        definition->phaseId        = fields[3].GetUInt32();
+        definition->terrainswapmap = fields[4].GetUInt32();
+        definition->flags          = fields[5].GetUInt32();
+        definition->conditionId    = fields[6].GetUInt32();
+
+        // A missing condition would silently gate the row off forever, so drop
+        // the reference and let the row apply unconditionally instead.
+        if (definition->conditionId &&
+            !sConditionStorage.LookupEntry<PlayerCondition>(definition->conditionId))
+        {
+            sLog.outErrorDb("Table `phase_definitions` zone %u entry %u references "
+                            "condition_id %u which does not exist, ignoring the condition.",
+                            definition->zoneId, definition->entry, definition->conditionId);
+            definition->conditionId = 0;
+        }
+
+        if (definition->terrainswapmap &&
+            !sMapStore.LookupEntry(definition->terrainswapmap))
+        {
+            sLog.outErrorDb("Table `phase_definitions` zone %u entry %u has terrainswapmap "
+                            "%u which does not exist in Map.dbc, ignoring the swap.",
+                            definition->zoneId, definition->entry, definition->terrainswapmap);
+            definition->terrainswapmap = 0;
+        }
+
+        _PhaseDefinitionStore[definition->zoneId].push_back(definition);
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u phase definitions", count);
+}
+
+/**
  * @brief Gets a loaded gossip text record by id.
  *
  * @param Text_ID The gossip text identifier.

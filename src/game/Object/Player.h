@@ -2502,6 +2502,7 @@ class Player : public Unit
 
         // Update area-dependent auras
         void UpdateAreaDependentAuras(); // subzones
+        void UpdatePhaseDefinitions();   // client-side phase ids + terrain swaps
 
         // Update zone-dependent pets
         void UpdateZoneDependentPets();

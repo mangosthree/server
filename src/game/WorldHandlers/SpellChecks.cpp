@@ -2069,13 +2069,21 @@ SpellCastResult Spell::CheckCasterAuras() const
             }
         }
 
+        // 70797 Belysra's Talisman (Losing Your Tail, 24616): the scripted
+        // escape from the Dark Scout's 70794 trap. The trap is mechanic
+        // FREEZE, not STUN, so the stun-mechanic rule below would eat the
+        // item use at the one moment the quest needs it; the capture shows
+        // the talisman firing through the freeze.
+        bool escapesFreezeTrap = m_spellInfo->ID == 70797;
+
         // spell is usable while stunned, check if caster has only mechanic stun auras, another stun types must prevent cast spell
         if (spellUsableWhileStunned)
         {
             bool is_stun_mechanic = true;
             Unit::AuraList const& stunAuras = m_caster->GetAurasByType(SPELL_AURA_MOD_STUN);
             for (Unit::AuraList::const_iterator itr = stunAuras.begin(); itr != stunAuras.end(); ++itr)
-                if (!(*itr)->HasMechanic(MECHANIC_STUN))
+                if (!(*itr)->HasMechanic(MECHANIC_STUN) &&
+                    !(escapesFreezeTrap && (*itr)->GetId() == 70794))
                 {
                     is_stun_mechanic = false;
                     break;

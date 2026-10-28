@@ -77,6 +77,7 @@ void AggressorAI::MoveInLineOfSight(Unit* u)
     }
 
     if (m_creature->CanInitiateAttack() && u->IsTargetableForAttack() &&
+        !u->IsImmuneToAttacker(m_creature) &&
         m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
@@ -198,7 +199,8 @@ bool AggressorAI::IsVisible(Unit* pl) const
  */
 bool AggressorAI::CanIgnoreForRelocationNotify(Unit* pWho) const
 {
-    return !pWho->IsTargetableForAttack() || !m_creature->IsHostileTo(pWho);
+    return !pWho->IsTargetableForAttack() || pWho->IsImmuneToAttacker(m_creature)
+           || !m_creature->IsHostileTo(pWho);
 }
 
 /**

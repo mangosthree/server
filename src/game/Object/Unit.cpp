@@ -37,6 +37,7 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
+#include "SQLStorages.h"
 #include "QuestDef.h"
 #include "Player.h"
 #include "Creature.h"
@@ -1234,6 +1235,30 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         ((Creature*)pVictim)->IsUnkillable())
     {
         damage = health > 1 ? health - 1 : 0;
+    }
+
+    // A unit the client holds immune to this attacker takes nothing from it.
+    if (pVictim->IsImmuneToAttacker(this))
+    {
+        damage = 0;
+    }
+
+    // Sparring: an NPC may neither kill its sparring partner nor push it below
+    // the partner's floor. Deliberately AFTER the unkillable clamp and using
+    // the same shape; unlike that one this does exempt self-damage, because a
+    // scripted self-kill must still resolve.
+    float fFloorPct = 0.0f;
+
+    if (pVictim->IsSparringWith(this, &fFloorPct))
+    {
+        if (damage >= health)
+        {
+            damage = health > 1 ? health - 1 : 0;
+        }
+        else if (pVictim->GetHealthPercent() <= fFloorPct)
+        {
+            damage = 0;
+        }
     }
 
     // Rage from Damage made (only from direct weapon damage)
@@ -3271,6 +3296,86 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 }
 
 /**
+* Tells whether an attacker is barred from attacking this unit at all.
+*
+* The two flags below are named for what vanilla-era MaNGOS believed they did.
+* The 4.3.4 client says otherwise: in its CanAttack (Wow-64.exe build 15595,
+* sub_14023D1E0) bit 0x8 marks a player-controlled unit, and the test reads
+*     if (!(attacker->flags & 0x8) && (target->flags & 0x200)) return false;
+*     if ( (attacker->flags & 0x8) && (target->flags & 0x100)) return false;
+* so 0x200 is "immune to NPCs" and 0x100 is "immune to players". This core
+* enforces neither against a known attacker - 0x200 is only ever read as "will
+* not start a fight itself" - which is why NPCs Blizzard marked untouchable,
+* quest givers among them, are cut down by hostile creatures here.
+*
+* The enum names are left alone: `server-two` shares them, and renaming them
+* would churn every caller for no behavioural gain.
+*
+* \arg \c pAttacker
+*   The unit that wants to attack; NULL or this unit itself is never immune.
+* \return
+*   true when the attack must not be allowed to happen.
+*/
+bool Unit::IsImmuneToAttacker(Unit const* pAttacker) const
+{
+    if (!pAttacker || pAttacker == this)
+    {
+        return false;
+    }
+
+    if (pAttacker->isCharmedOwnedByPlayerOrPlayer())
+    {
+        return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+    }
+
+    return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+}
+
+/**
+* Tells whether damage from an attacker is capped by a sparring floor.
+*
+* \arg \c pAttacker
+*   The unit dealing the damage. Players and anything they own spar with
+*   nobody - only creature-on-creature damage is capped.
+* \arg \c pFloorPct
+*   Filled with the health percentage the victim may not be pushed below.
+* \return
+*   true when the pair is a sparring pair.
+*/
+bool Unit::IsSparringWith(Unit const* pAttacker, float* pFloorPct /*= NULL*/) const
+{
+    if (!pAttacker || pAttacker == this)
+    {
+        return false;
+    }
+
+    if (GetTypeId() != TYPEID_UNIT || pAttacker->GetTypeId() != TYPEID_UNIT)
+    {
+        return false;
+    }
+
+    if (pAttacker->isCharmedOwnedByPlayerOrPlayer())
+    {
+        return false;
+    }
+
+    CreatureSparring const* pSparring =
+        sCreatureSparringStorage.LookupEntry<CreatureSparring>(GetEntry());
+
+    if (!pSparring)
+    {
+        return false;
+    }
+
+    if (pFloorPct)
+    {
+        *pFloorPct = pSparring->HealthLimitPct;
+    }
+
+    return true;
+}
+
+/**
  * @brief Starts attacking a victim.
  *
  * @param victim The victim to attack.
@@ -3286,6 +3391,12 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
     // dead units can neither attack nor be attacked
     if (!IsAlive() || !victim->IsInWorld() || !victim->IsAlive())
+    {
+        return false;
+    }
+
+    // nor can anything attack a unit the client holds immune to it
+    if (victim->IsImmuneToAttacker(this))
     {
         return false;
     }

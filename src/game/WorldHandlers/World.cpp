@@ -431,6 +431,9 @@ bool World::SetInitialWorldSettings()
     sLog.outString("Loading Vehicle Accessory...");         // must be after creature templates
     sObjectMgr.LoadVehicleAccessory();
 
+    sLog.outString("Loading Creature Sparring Templates...");
+    sObjectMgr.LoadCreatureSparring();
+
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
 
@@ -497,6 +500,11 @@ bool World::SetInitialWorldSettings()
     // Load Conditions
     sLog.outString("Loading Conditions...");
     sObjectMgr.LoadConditions();
+
+    // Must follow LoadConditions(): every definition's condition_id is
+    // validated against the loaded conditions as it is read.
+    sLog.outString("Loading Phase Definitions...");
+    sObjectMgr.LoadPhaseDefinitions();
 
     sLog.outString("Creating map persistent states for non-instanceable maps...");     // must be after PackInstances(), LoadCreatures(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
     sMapPersistentStateMgr.InitWorldMaps();

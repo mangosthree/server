@@ -862,6 +862,26 @@ bool GameObject::ActivateToQuest(Player* pTarget) const
             }
             break;
         }
+        case GAMEOBJECT_TYPE_DOOR:
+        {
+            // A door carrying a quest id in its (otherwise unused) data8
+            // slot sparkles while that quest is on. The 18019 capture shows
+            // the Music Hall Cellar Door (195621) lighting up the moment
+            // The Rebel Lord's Arsenal is accepted, with no objective
+            // linkage anywhere in the quest data - retail keeps the link
+            // with the door, and so do we. Two subtleties, both retail:
+            // IsCurrentQuest rather than INCOMPLETE, because a report-to
+            // quest with no objectives is COMPLETE the moment it is taken
+            // and the sparkle burns for the whole active window; and the
+            // sparkle dies for whoever has already OPENED the door - the
+            // click ends it, not the turn-in.
+            if (pTarget->IsCurrentQuest(GetGOInfo()->raw.data[8]) &&
+                !pTarget->HasOpenedQuestDoor(GetGOInfo()->raw.data[8]))
+            {
+                return true;
+            }
+            break;
+        }
         default:
             break;
     }

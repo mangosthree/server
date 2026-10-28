@@ -837,6 +837,13 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                                 *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
                                 *data << uint16(-1);
                                 break;
+                            case GAMEOBJECT_TYPE_DOOR:
+                                // Doors glitter, they do not highlight: the
+                                // capture shows the bare sparkle bit on the
+                                // Cellar Door, never the activate bit.
+                                *data << uint16(GO_DYNFLAG_LO_SPARKLE);
+                                *data << uint16(-1);
+                                break;
                             default:
                                 // unknown, not happen.
                                 *data << uint16(0);

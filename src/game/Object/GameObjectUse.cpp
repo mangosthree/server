@@ -105,6 +105,19 @@ void GameObject::Use(Unit* user)
             // doors never really despawn, only reset to default state/flags
             UseDoorOrButton();
 
+            // A quest-sparkle door (data8) goes dark for whoever opened it:
+            // the retail sparkle dies on the click, not at the turn-in.
+            if (GetGOInfo()->raw.data[8] && user->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)user)->SetQuestDoorOpened(GetGOInfo()->raw.data[8]);
+
+                UpdateData udata(GetMapId());
+                WorldPacket packet;
+                BuildValuesUpdateBlockForPlayer(&udata, (Player*)user);
+                udata.BuildPacket(&packet);
+                ((Player*)user)->GetSession()->SendPacket(&packet);
+            }
+
             // activate script
             if (!scriptReturnValue)
             {

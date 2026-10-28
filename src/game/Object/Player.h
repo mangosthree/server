@@ -1787,6 +1787,9 @@ class Player : public Unit
         // if completed_or_not = 1 - returns true, if quest is taken but not completed
         // if completed_or_not = 2 - returns true, if quest is taken and already completed
         bool IsCurrentQuest(uint32 quest_id, uint8 completed_or_not = 0) const; // taken and not yet rewarded
+        /// Marks the quest-sparkle door of \c quest_id as opened; taking the quest again clears it.
+        void SetQuestDoorOpened(uint32 quest_id) { m_questDoorsOpened.insert(quest_id); }
+        bool HasOpenedQuestDoor(uint32 quest_id) const { return m_questDoorsOpened.find(quest_id) != m_questDoorsOpened.end(); }
 
         // Get the next quest in a chain
         Quest const* GetNextQuest(ObjectGuid guid, Quest const* pQuest);
@@ -4018,6 +4021,7 @@ class Player : public Unit
         int8 m_comboPoints; // Combo points
 
         QuestStatusMap mQuestStatus; // Quest status map
+        std::set<uint32> m_questDoorsOpened; ///< quests whose sparkle door this player has opened
 
         SkillStatusMap mSkillStatus;
 

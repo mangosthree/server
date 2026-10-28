@@ -744,6 +744,7 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
     // check for repeatable quests status reset
     questStatusData.m_status = QUEST_STATUS_INCOMPLETE;
     questStatusData.m_explored = false;
+    m_questDoorsOpened.erase(quest_id);
 
     if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_DELIVER))
     {

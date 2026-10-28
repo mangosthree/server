@@ -7236,6 +7236,14 @@ void Unit::OnRelocated()
  */
 void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
 {
+    // Everyone off before the seats vanish: a passenger still boarded when
+    // the VehicleInfo is deleted keeps a freed TransportInfo and the server
+    // dies on its next touch.
+    if (m_vehicleInfo)
+    {
+        m_vehicleInfo->UnBoardAll();
+    }
+
     delete m_vehicleInfo;
 
     if (entry)

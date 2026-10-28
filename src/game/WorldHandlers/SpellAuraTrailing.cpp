@@ -203,6 +203,18 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
     else
     {
         target->GetVehicleInfo()->UnBoard(caster, m_removeMode == AURA_REMOVE_BY_TRACKING);
+
+        // The ride spell lands twice: aura 236 on the vehicle, and a
+        // self-targeted dummy on the passenger (43671 and 46598 both carry it
+        // as their second effect - retail shows it as the rider's own aura and
+        // strips it at every eject). That is a SEPARATE holder on the
+        // passenger, so removing the vehicle's does not touch it, and left
+        // behind it keeps the client drawing the seated ride pose - arms out,
+        // holding reins or cannon grips - long after the ride has ended.
+        if (m_removeMode != AURA_REMOVE_BY_TRACKING)
+        {
+            caster->RemoveAurasDueToSpell(GetId());
+        }
     }
 }
 

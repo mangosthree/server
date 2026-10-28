@@ -87,6 +87,24 @@
  */
 void Player::SetRoot(bool enable)
 {
+    // The flag is maintained here, exactly as `Creature::SetRoot` maintains it,
+    // because `Unit::IsRooted` reads nothing else:
+    //     bool IsRooted() const
+    //     { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
+    // Sending only the packet left that answer permanently false for a player,
+    // so `VehicleInfo::UnBoard`, which releases a passenger with
+    //     if (passenger->IsRooted()) { passenger->SetRoot(false); }
+    // never released one - the rider was rooted onto the vehicle and then left
+    // rooted to the spot after dismounting, with no way to move again.
+    if (enable)
+    {
+        m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
+    }
+    else
+    {
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+    }
+
     WorldPacket data;
     BuildForceMoveRootPacket(&data, enable, 0);
     SendMessageToSet(&data, true);

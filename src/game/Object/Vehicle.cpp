@@ -49,6 +49,9 @@
 #include "movement/MoveSpline.h"
 #include "MapManager.h"
 #include "TemporarySummon.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
@@ -94,6 +97,22 @@ void ObjectMgr::LoadVehicleAccessory()
  * This function will initialise the VehicleInfo of the vehicle owner
  * Also the seat-map is created here
  */
+/// Guesswork kept from the original code: what a summoned vehicle waits before
+/// despawning once its controller has unboarded, unless a script says otherwise.
+static const uint32 VEHICLE_DEFAULT_DESPAWN_DELAY = 1000;
+
+/// How far to the side of the seat a passenger is set down on unboarding.
+/// Measured on five retail exits in the 18019 Gilneas captures (both seats of
+/// Greymane's horse and of Crowley's, and a stagecoach): every exit spline
+/// ended 1.0 yard out from the seat, perpendicular to the vehicle's facing.
+/// The side is the RIGHT - unless someone is already standing there. Krennan,
+/// let off half a second after the rider had landed on the right, went left;
+/// Crowley and his rider, ejected in the same tick, both went right.
+static const float VEHICLE_EXIT_SIDE_STEP = 1.0f;
+
+/// Anything standing closer than this to the right-hand spot claims it.
+static const float VEHICLE_EXIT_SPOT_RADIUS = 0.75f;
+
 VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry) :
     m_vehicleEntry(vehicleEntry),
     m_creatureSeats(0),
@@ -102,7 +121,8 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
     m_isInitialized(false),
     m_owner(owner),
     m_lastPose(owner->Where()),
-    m_updatePositionsTimer(500)
+    m_updatePositionsTimer(500),
+    m_despawnDelay(VEHICLE_DEFAULT_DESPAWN_DELAY)
 {
     MANGOS_ASSERT(vehicleEntry);
     MANGOS_ASSERT(m_owner);
@@ -134,7 +154,33 @@ VehicleInfo::~VehicleInfo()
 {
     ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
 
+    UnBoardAll();                                           // Script-boarded passengers hold pointers into this object
+
     RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)
+}
+
+/**
+ * Ejects every remaining passenger. Aura-boarded riders normally leave with
+ * their aura; this sweeps the rest - a passenger left seated past the
+ * vehicle's death keeps a dangling TransportInfo and crashes on its next
+ * use (found the hard way: SetVehicleId(0) while a rescued watchman still
+ * rode the player).
+ */
+void VehicleInfo::UnBoardAll()
+{
+    while (!m_passengers.empty())
+    {
+        WorldObject* passenger = m_passengers.begin()->first;
+
+        if (passenger->isType(TYPEMASK_UNIT))
+        {
+            UnBoard((Unit*)passenger, false);
+        }
+        else
+        {
+            UnBoardPassenger(passenger);
+        }
+    }
 }
 
 void VehicleInfo::Initialize()
@@ -323,7 +369,11 @@ void TransportInfo::SetSeatPose(Geometry::Placement const& seatPose)
     // every reach test act as though the riders were points.
     m_seatPose.Resize(m_owner->Where().Extent());
 
-    m_owner->Place() = m_seatPose;
+    // The passenger's own placement is NOT touched here: the map derives grid
+    // cells from it (Map::PlayerRelocation, Map::Remove), so it must always
+    // hold a world-frame pose. The seat pose lives in m_seatPose and in the
+    // movement info below; VehicleInfo::UpdateGlobalPositions refreshes the
+    // world pose from it as the vehicle moves.
 
     // The create block a LATER observer receives carries this offset, so a rider that moved
     // and then had someone arrive would otherwise be drawn at the spot it boarded at.
@@ -402,14 +452,28 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         passenger->SetRoot(true);
     }
 
+    // Glide to the seat's own offset. Launch() takes a boarded unit's start
+    // point from its seat pose, so the whole spline stays in the local frame
     Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
-    init.SetFacing(0.0f);                                   // local orientation ? ToDo: Set proper orientation!
+    init.MoveTo(seatEntry->AttachmentOffset_0,
+                seatEntry->AttachmentOffset_1,
+                seatEntry->AttachmentOffset_2);
+    // Seat yaw/pitch/roll is a model-attachment rotation the client applies
+    // itself - not a facing, which has no pitch or roll - so this stays 0
+    init.SetFacing(0.0f);
     init.SetBoardVehicle();
     init.Launch();
 
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->Flags);
+
+    // Snap the passenger's world pose to the seat it now occupies. `Update`
+    // re-derives world positions only after the owner has moved a yard from
+    // `m_lastPose`, which starts at the owner's current pose - so boarding a
+    // STATIONARY vehicle would otherwise never resync the rider at all. The
+    // composed position is the boarding spot, so this is same-cell and does
+    // no grid surgery in the normal case.
+    UpdateGlobalPositionOf(passenger, lx, ly, lz, lo);
 
 #ifdef ENABLE_ELUNA
     if (Eluna* e = passenger->GetEluna())
@@ -467,16 +531,19 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     // Set to new seat
     itr->second->SetTransportSeat(seat);
 
-    Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
-    //if (oldorientation != neworientation) (?)
-    //init.SetFacing(0.0f);                                 // local orientation ? ToDo: Set proper orientation!
-    // It seems that Seat switching is sent without SplineFlag BoardVehicle
-    init.Launch();
-
     // Get seatEntry of new seat
     seatEntry = GetSeatEntry(seat);
     MANGOS_ASSERT(seatEntry);
+
+    // Glide to the new seat's own offset, in the vehicle's local frame
+    Movement::MoveSplineInit init(*passenger);
+    init.MoveTo(seatEntry->AttachmentOffset_0,
+                seatEntry->AttachmentOffset_1,
+                seatEntry->AttachmentOffset_2);
+    // No facing is set: seat yaw/pitch/roll is a model-attachment rotation
+    // the client applies itself, so the local orientation stays as it is
+    // It seems that Seat switching is sent without SplineFlag BoardVehicle
+    init.Launch();
 
     // Apply passenger modifications of the new seat
     ApplySeatMods(passenger, seatEntry->Flags);
@@ -489,6 +556,36 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
  * @param changeVehicle     If set, the passenger is expected to be directly boarded to another vehicle,
  *                          and hence he will not be unboarded but only removed from this vehicle.
  */
+/// Is some other unit already standing on the spot a passenger would step
+/// off to? Passengers still aboard do not count, nor does the vehicle.
+bool VehicleInfo::IsExitSpotTaken(Unit const* passenger, float x, float y) const
+{
+    std::list<Unit*> nearby;
+    MaNGOS::AnyUnitInObjectRangeCheck check(m_owner, VEHICLE_EXIT_SIDE_STEP * 2 + 1.0f);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(nearby, check);
+    Cell::VisitAllObjects(m_owner, searcher, VEHICLE_EXIT_SIDE_STEP * 2 + 1.0f);
+
+    for (std::list<Unit*>::const_iterator itr = nearby.begin(); itr != nearby.end(); ++itr)
+    {
+        Unit* unit = *itr;
+
+        if (unit == m_owner || unit == passenger || HasOnBoard(unit))
+        {
+            continue;
+        }
+
+        const float dx = unit->Where().X() - x;
+        const float dy = unit->Where().Y() - y;
+
+        if (dx * dx + dy * dy < VEHICLE_EXIT_SPOT_RADIUS * VEHICLE_EXIT_SPOT_RADIUS)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 {
     MANGOS_ASSERT(passenger);
@@ -500,6 +597,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     VehicleSeatEntry const* seatEntry = GetSeatEntry(itr->second->GetTransportSeat());
     MANGOS_ASSERT(seatEntry);
+
+    // Needed after the passenger record below is gone: where the seat was.
+    const Geometry::Placement seatPose = itr->second->Seat();
 
     UnBoardPassenger(passenger);
 
@@ -525,11 +625,49 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             passenger->SetRoot(false);
         }
 
+        // Set the passenger down BESIDE the seat rather than inside the vehicle:
+        // the seat's world position, pushed one yard out perpendicular to the
+        // vehicle's facing (right for even seats, left for odd), at the
+        // vehicle's own ground height, facing the way the vehicle faces. That
+        // is what the retail exit splines do - see VEHICLE_EXIT_SIDE_STEP.
+        float gx, gy, gz, go;
+        CalculateGlobalPositionOf(seatPose.X(), seatPose.Y(), seatPose.Z(),
+                                  seatPose.Facing(), gx, gy, gz, go);
+
+        const float facing = m_owner->Where().Facing();
+        float ex = gx + cos(facing - M_PI_F / 2) * VEHICLE_EXIT_SIDE_STEP;
+        float ey = gy + sin(facing - M_PI_F / 2) * VEHICLE_EXIT_SIDE_STEP;
+
+        if (IsExitSpotTaken(passenger, ex, ey))
+        {
+            ex = gx + cos(facing + M_PI_F / 2) * VEHICLE_EXIT_SIDE_STEP;
+            ey = gy + sin(facing + M_PI_F / 2) * VEHICLE_EXIT_SIDE_STEP;
+        }
+
         Movement::MoveSplineInit init(*passenger);
-        // ToDo: Set proper unboard coordinates
-        init.MoveTo(m_owner->Where().X(), m_owner->Where().Y(), m_owner->Where().Z());
+        init.MoveTo(ex, ey, m_owner->Where().Z());
+        init.SetFacing(facing);
         init.SetExitVehicle();
         init.Launch();
+
+        // Only now does the rider get his own body back.
+        //
+        // Releasing the vehicle is half of it: the client picks its mover from
+        // control updates alone, so told (vehicle, 0) and nothing else it ends
+        // up controlling NOTHING, and a second later the vehicle despawns and
+        // that slot points at a deleted object - not rooted, moverless, every
+        // key dead. But the restoring update cannot be sent from
+        // `RemoveSeatMods` either: that runs before the transport data above is
+        // cleared and before the exit spline is away, so the client is still
+        // holding him on a vehicle and quietly declines the mover. Both were
+        // confirmed on the wire - the (player, 1) update went out and no
+        // CMSG_SET_ACTIVE_MOVER ever came back. Sent here, the exit is already
+        // complete and there is nothing left to decline.
+        if (passenger->GetTypeId() == TYPEID_PLAYER &&
+            (seatEntry->Flags & SEAT_FLAG_CAN_CONTROL))
+        {
+            ((Player*)passenger)->SetClientControl(passenger, 1);
+        }
 
         // Despawn if passenger was accessory
         if (passenger->GetTypeId() == TYPEID_UNIT && m_accessoryGuids.find(passenger->GetObjectGuid()) != m_accessoryGuids.end())
@@ -557,7 +695,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         {
             if (((Creature*)m_owner)->IsTemporarySummon())
             {
-                ((Creature*)m_owner)->ForcedDespawn(1000);
+                ((Creature*)m_owner)->ForcedDespawn(m_despawnDelay);
             }
         }
     }
@@ -670,6 +808,22 @@ void VehicleInfo::UpdateGlobalPositionOf(WorldObject* passenger, float lx, float
 {
     float gx, gy, gz, go;
     CalculateGlobalPositionOf(lx, ly, lz, lo, gx, gy, gz, go);
+
+    // Map relocation derives the passenger's OLD cell from its placement; a
+    // pose in any frame but the owner's would name a bogus cell (a seat pose
+    // reads as the map origin, whose grid is typically not even loaded, and
+    // the removal walk would dereference NULL). Must not happen for a vehicle
+    // passenger - repair the pose in place, skip the grid walk, and complain.
+    if (passenger->Where().CurrentFrame() != m_owner->Where().CurrentFrame())
+    {
+        sLog.outError("VehicleInfo::UpdateGlobalPositionOf: %s placement is "
+                      "not in %s's world frame; repairing without relocation.",
+                      passenger->GetGuidStr().c_str(),
+                      m_owner->GetGuidStr().c_str());
+        passenger->Place().Rebase(m_owner->Where().CurrentFrame());
+        passenger->Place().MoveTo(gx, gy, gz, go);
+        return;
+    }
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
@@ -892,6 +1046,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
             pPlayer->SetClientControl(pVehicle, 0);
             pPlayer->SetMover(NULL);
+
+            // Control of his own body is NOT handed back here - `UnBoard` does
+            // it once the exit is complete. See the note there.
 
             pVehicle->clearUnitState(UNIT_STAT_CONTROLLED);
             pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);

@@ -789,7 +789,14 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 
                 CreatureInfo const* cinfo = GetCreatureInfo();
 
-                SelectLevel(cinfo);
+                // Keep the level this spawn already rolled. Re-rolling on every
+                // respawn makes UNIT_FIELD_LEVEL flicker on a unit the client
+                // already knows - a MinLevel 4 / MaxLevel 5 creature on a five
+                // second timer changes level roughly every other death.
+                uint32 const uiKeepLevel = getLevel();
+                SelectLevel(cinfo, 100.0f,
+                    (uiKeepLevel >= cinfo->MinLevel && uiKeepLevel <= cinfo->MaxLevel)
+                        ? uiKeepLevel : USE_DEFAULT_DATABASE_LEVEL);
                 UpdateAllStats();  // to be sure stats is correct regarding level of the creature
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
                 if (m_IsDeadByDefault)
@@ -918,10 +925,16 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 m_cannotReachTimer += update_diff;
                 if (m_cannotReachTimer >= CREATURE_NOPATH_EVADE_TIME)
                 {
-                    SetCannotReachTarget(false);
-                    if (AI())
+                    // With other attackers still on the list, SelectHostileTarget
+                    // rotates to the next one instead; the full evade is the
+                    // last-attacker answer.
+                    if (GetThreatManager().getThreatList().size() < 2)
                     {
-                        AI()->EnterEvadeMode();
+                        SetCannotReachTarget(false);
+                        if (AI())
+                        {
+                            AI()->EnterEvadeMode();
+                        }
                     }
                 }
             }
@@ -2099,6 +2112,18 @@ void Creature::SetDeathState(DeathState s)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         SetWalk(true, true);
+
+        // The reused object can carry movement state from its last life:
+        // natural spline completion never clears MOVEFLAG_FORWARD, and a
+        // despawn mid-move leaves the spline unfinalized. Either one gets
+        // written into the respawn create-block and the client animates a
+        // ghost walk in place at the spawn point forever.
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_FORWARD);
+        if (!movespline->Finalized())
+        {
+            movespline->_Interrupt();
+        }
+
         i_motionMaster.Initialize();
     }
 }
@@ -2687,11 +2712,32 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
         return false;
     }
 
+    // A unit fighting FOR a player is leashed to its master, not to a patch
+    // of ground: the pack a quest whistle summons must chase wherever the
+    // whistler's fight goes. Without this, a summon ordered onto a target
+    // beyond ThreatRadius of its pop point flips that target out-of-area
+    // every tick - a re-aggro storm that resets the chase spline before it
+    // can move. TrinityCore's CanCreatureAttack applies its home-distance
+    // rules only to units with no player charmer-or-owner, for this reason.
+    if (GetCharmerOrOwnerGuid().IsPlayer())
+    {
+        return false;
+    }
+
     float AttackDist = GetAttackDistance(pVictim);
     float ThreatRadius = sWorld.getConfig(CONFIG_FLOAT_THREAT_RADIUS);
 
+    // Leash from where the creature LIVES, not from where this particular
+    // fight started. `CombatAnchor()` is re-set on every fresh aggro, so a
+    // wandering creature that picks up a new target part way across the zone
+    // carries its leash with it and can be walked anywhere. Anchoring on the
+    // spawn is what gives "chase a little, then go home". Temporary summons
+    // keep the combat anchor - their spawn is wherever they happened to pop.
+    Geometry::Vector3 const& anchor = IsTemporarySummon()
+        ? CombatAnchor() : Spawn().Pos();
+
     // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-    return !pVictim->Where().WithinDist(CombatAnchor(), ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
+    return !pVictim->Where().WithinDist(anchor, ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
 }
 
 /**

@@ -409,8 +409,14 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->attackType, damageInfo->hitOutCome);
     DealDamage(pVictim, damageInfo->damage, &cleanDamage, DIRECT_DAMAGE, damageInfo->damageSchoolMask, NULL, durabilityLoss);
 
-    // If this is a creature and it attacks from behind it has a probability to daze it's victim
+    // If this is a creature and it attacks a PLAYER from behind it has a
+    // probability to daze him. The victim check is not decoration: daze is a
+    // player-only mechanic, and without it any creature struck in the back is
+    // eligible - which halves the speed of pets, escorted NPCs and, worst,
+    // scripted vehicles. A quest ride that is meant to be chased gets dazed
+    // by its own pursuers and crawls (found on `Sacrifices`, quest 14212).
     if ((damageInfo->hitOutCome == MELEE_HIT_CRIT || damageInfo->hitOutCome == MELEE_HIT_CRUSHING || damageInfo->hitOutCome == MELEE_HIT_NORMAL || damageInfo->hitOutCome == MELEE_HIT_GLANCING) &&
+        pVictim->GetTypeId() == TYPEID_PLAYER &&
         GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->GetCharmerOrOwnerGuid() && !pVictim->Where().HasInArc(this->Where(), M_PI_F))
     {
         // -probability is between 0% and 40%

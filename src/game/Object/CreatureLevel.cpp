@@ -172,15 +172,21 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
  *
  * @param cinfo The creature template providing level bounds and base stats.
  * @param percentHealth The starting health percentage to apply.
+ * @param forcedLevel The level to keep, or USE_DEFAULT_DATABASE_LEVEL to roll a new one.
  */
-void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 100.0f*/)
+void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 100.0f*/,
+                           uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 {
     uint32 rank = IsPet() ? 0 : cinfo->Rank;                // TODO :: IsPet probably not needed here
 
     // level
     uint32 const minlevel = cinfo->MinLevel;
     uint32 const maxlevel = cinfo->MaxLevel;
-    uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
+    uint32 level = forcedLevel;
+    if (level == USE_DEFAULT_DATABASE_LEVEL)
+    {
+        level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
+    }
     SetLevel(level);
 
     //////////////////////////////////////////////////////////////////////////

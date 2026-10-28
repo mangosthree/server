@@ -3323,14 +3323,17 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     {
         if (m_attacking == victim)
         {
-            // switch to melee attack from ranged/magic
-            if (meleeAttack)
+            // Switch to melee attack from ranged/magic: true only when this
+            // call actually re-armed the swing. Returning true for a victim
+            // already under melee attack (a 2016 restructure moved the return
+            // out of the guard; the WotLK sibling kept it in) made every
+            // redundant AttackStart - and the assist worker issues them
+            // ungated - re-Mutate the chase and relaunch its spline: units
+            // visibly rubber-band back to the server position mid-charge.
+            if (meleeAttack && !hasUnitState(UNIT_STAT_MELEE_ATTACKING))
             {
-                if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))
-                {
-                    addUnitState(UNIT_STAT_MELEE_ATTACKING);
-                    SendMeleeAttackStart(victim);
-                }
+                addUnitState(UNIT_STAT_MELEE_ATTACKING);
+                SendMeleeAttackStart(victim);
                 return true;
             }
             return false;

@@ -118,11 +118,22 @@ Motion::MoveIntent TargetedMovementGenerator::Intent(Unit& owner,
         return Motion::MoveIntent::Hold();
     }
 
+    // The victim died or was swapped away: this chase is finished. Returning
+    // Done pops the generator so whatever it interrupted - a march leg, a
+    // formation slot, the default movement - resumes, instead of a dead chase
+    // holding the top of the stack forever. (A new victim gets a fresh chase
+    // pushed by AttackStart before this one is ever ticked again, so the
+    // unwind only happens once the fighting is actually over.)
+    if (LostTarget(owner))
+    {
+        ClearMoveState(owner);
+        return Motion::MoveIntent::Done();
+    }
+
     const bool blockedByState =
         owner.hasUnitState(UNIT_STAT_NOT_MOVE) ||
         (GetMovementGeneratorType() == CHASE_MOTION_TYPE &&
-         owner.hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT)) ||
-        LostTarget(owner);
+         owner.hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT));
 
     if (blockedByState)
     {
